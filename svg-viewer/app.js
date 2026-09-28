@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!/\bPLAN$/.test(title)) title += ' PLAN';
         el('text', { x: left, y: top + T * 2, class: 'title-main', 'font-size': T * 2.2 }, g).textContent = title;
         const sub = [plan.title, level && level.elevation_mm != null ? `Level elevation ${fmtLen(level.elevation_mm)}${units === 'metric' ? ' m' : ''}` : null,
-            'Room dimensions to wall centerlines'].filter(Boolean).join('   ·   ');
+            'Room dimensions to wall centerlines', 'CONCEPT DESIGN — NOT FOR CONSTRUCTION'].filter(Boolean).join('   ·   ');
         el('text', { x: left, y: top + T * 3.6, class: 'title-sub', 'font-size': T * 0.95 }, g).textContent = sub;
 
         // Graphic scale bar
