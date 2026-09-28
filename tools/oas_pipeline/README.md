@@ -4,8 +4,10 @@ A reusable pipeline for producing residential floor plans as OAS-Layout JSON:
 
 ```
 design spec ──generate──▶ OAS-Layout JSON ──validate──▶ report
-(spec.json)               (+ one file per level)   └─program check (program.json)
-                                                    └─render (svg-viewer screenshots)
+(spec.json)               (+ one file per level)   ├─program check (program.json)
+                                 │                  └─render (svg-viewer screenshots)
+                                 └──exterior──▶ 3D exterior model ──consistency──▶ report
+                                    (+ exterior.json design spec)  └─render views + renderer audit
 ```
 
 The **design spec** holds only the designer's decisions (room outlines, wall runs, where
@@ -134,6 +136,52 @@ Supported checks:
 - **Circulation:** `no_pass_through_usages`, for example: no room may be reached only by walking through a bedroom.
   Closets and en-suite baths are allowed off a bedroom via `allow_behind_usages`.
 
+## Exterior (3D) model
+
+`exterior/` turns any OAS-Layout plan into a 3D **exterior model** and checks it against the plan.
+It is not tied to one house (see `tests/test_exterior.py`: barndominium + cabin).
+
+```bash
+(cd tools/oas_pipeline/exterior && npm install)     # three.js for the renderer
+python3 tools/oas_pipeline exterior PLAN.json -o out/ [--design EXTERIOR.json] [--render]
+```
+
+Outputs:
+- `<plan>.exterior.json`: the model;
+- `<plan>.consistency.{txt,json}`: the report;
+- with `--render`:
+  - `front/rear/left/right.png` (orthographic elevations) and `perspective.png`, `aerial.png`;
+  - `*_provenance.png`, which colour elements plan / derived / inferred;
+  - `audit.json`: what the renderer actually drew, re-checked against the model.
+
+**Provenance.** Every element is one of:
+
+| Class | Meaning | Examples |
+|---|---|---|
+| `plan` | Taken from the plan. | Exterior wall panels around exact openings, doors/windows/garage doors, porch/balcony/deck floors, balcony railings, ground slabs. |
+| `derived` | Deterministic from plan data. | Roof planes from OAS roof entities, gable/shed infill, floor-structure bands. |
+| `inferred` | Exterior-design assumption. The rule and assumptions are recorded on the element and the parameters are in the design spec. | Posts and beams, thicknesses, railing height, grade, driveway, and a default roof when the plan has none. |
+
+The renderer (`exterior/viewer/`) only draws the model. It adds visual detail (frames, glass,
+balusters) strictly inside each opening/railing envelope, and the audit enforces that.
+
+**Consistency check** (`exterior/consistency.py`), plan vs 3D, computed from the plan independently:
+- floor heights, building footprint, exterior wall positions, story extents;
+- exterior doors, windows, garage doors;
+- porches, balconies, decks, railings;
+- externally relevant stairs, roofs;
+- provenance labelling, and that inferred supports stay clear of plan walls;
+- the renderer audit.
+
+Plan problems found while building the model (for example a roof edge with nothing under it, or
+overlapping roofs) are reported as `[plan issue]` warnings. They are never repaired silently. To
+opt in to inferred knee walls under unsupported roof edges, set `"infer_roof_bearing_walls": true`;
+they are flagged as inferred and as extending the story.
+
+**Exterior design spec** (`exterior/design_defaults.json`, overridden per house, e.g.
+`examples/barndominium_40x60/exterior.json`) holds materials and the parameters for inferred detail.
+It is purely aesthetic and never moves geometry.
+
 ## Files
 
 | File | Purpose |
@@ -143,4 +191,8 @@ Supported checks:
 | `program.py` | `check_program()` against an OAS-Program brief |
 | `render.mjs` | Playwright script: screenshot every level in `svg-viewer` |
 | `__main__.py` | CLI (`build`, `generate`, `validate`, `render`) |
-| `tests/` | regression, fault-injection and spec-error tests |
+| `exterior/model.py` | plan → 3D exterior model with provenance and plan-issue reporting |
+| `exterior/consistency.py` | plan ↔ 3D ↔ drawn-scene consistency check |
+| `exterior/viewer/`, `exterior/render.mjs` | three.js renderer (draw-only) and headless screenshot + audit script |
+| `exterior/design_defaults.json` | default exterior design spec (inferred/aesthetic parameters) |
+| `tests/` | regression, fault-injection, spec-error, plan→3D propagation tests |

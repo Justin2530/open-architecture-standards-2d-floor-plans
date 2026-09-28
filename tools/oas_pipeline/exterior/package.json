@@ -1,0 +1,12 @@
+{
+  "name": "oas-exterior-renderer",
+  "private": true,
+  "description": "Renders an OAS exterior model (tools/oas_pipeline/exterior/model.py) with three.js; used by `python3 tools/oas_pipeline exterior --render`.",
+  "type": "module",
+  "dependencies": {
+    "three": "0.160.0"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.40.0"
+  }
+}

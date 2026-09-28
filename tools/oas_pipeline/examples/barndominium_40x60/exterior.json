@@ -1,0 +1,17 @@
+{
+  "_comment": "Exterior design choices for the barndominium (inferred/aesthetic layer, not plan geometry): black board-and-batten siding, wood decks, cedar posts, black metal railing.",
+  "materials": {
+    "wall": "black_board_and_batten",
+    "roof": "charcoal_standing_seam",
+    "deck": "cedar_decking",
+    "post": "cedar",
+    "beam": "cedar",
+    "trim": "black_trim",
+    "railing": "black_metal",
+    "window": "black_trim",
+    "door": "black_trim",
+    "glass_door": "black_trim",
+    "entry_door": "cedar",
+    "vehicle_door": "cedar_carriage_garage_door"
+  }
+}

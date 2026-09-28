@@ -1,0 +1,113 @@
+
+FLOOR HEIGHTS
+  ok   level_01 elevation: plan 0 | 3D 0
+  ok   level_02 elevation: plan 3048 | 3D 3048
+
+EXTERIOR WALLS
+  ok   l1_w_south_1: plan L=6096 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_south_2: plan L=3353 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_south_3: plan L=8839 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_south_4: plan L=6096 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_east_1: plan L=4877 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_east_2: plan L=3048 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_east_3: plan L=4267 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_north_1: plan L=6096 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_north_2: plan L=3353 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_north_3: plan L=2133 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_north_4: plan L=6706 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_north_5: plan L=1219 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_north_6: plan L=4877 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l1_w_west_1: plan L=12192 t=152 z=0..2743 | 3D z=0..2743 gap=0.000m2 extra=0.000m2
+  ok   l2_w_south_1: plan L=5486 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_south_2: plan L=6706 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_west_1: plan L=2743 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_west_2: plan L=3963 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_west_3: plan L=1219 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_west_4: plan L=4267 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_north_1: plan L=4877 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_north_2: plan L=2438 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_north_3: plan L=4877 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_east_1: plan L=7925 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_east_2: plan L=1524 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   l2_w_east_3: plan L=2743 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+
+STORY EXTENTS
+  ok   level_01 enclosed outline: plan 80.00' x 40.00' | 3D 80.00' x 40.00' (centreline), perimeter walled 100.0%
+  ok   level_02 enclosed outline: plan 40.00' x 40.00' | 3D 40.00' x 40.00' (centreline), perimeter walled 100.0%
+
+BUILDING FOOTPRINT
+  ok   ground floor incl. garage: plan 297.29 m2 (3200 sf) 80.00' x 40.00' | 3D 80.00' x 40.00' (centreline)
+
+WINDOWS
+  ok   l1_win_garage: plan at 2438 w1219 h1219 sill z1219 | 3D at 2438 w1219 h1219 sill z1219 (window)
+  ok   l1_win_foyer: plan at 457 w914 h1524 sill z914 | 3D at 457 w914 h1524 sill z914 (window)
+  ok   l1_win_living_w: plan at 762 w1219 h1524 sill z914 | 3D at 762 w1219 h1524 sill z914 (window)
+  ok   l1_win_living_e: plan at 6096 w1829 h1524 sill z914 | 3D at 6096 w1829 h1524 sill z914 (window)
+  ok   l1_win_mbed_s: plan at 2134 w1829 h1524 sill z914 | 3D at 2134 w1829 h1524 sill z914 (window)
+  ok   l1_win_mbed_e: plan at 1524 w1524 h1524 sill z914 | 3D at 1524 w1524 h1524 sill z914 (window)
+  ok   l1_win_mbath_e: plan at 1524 w1219 h1067 sill z1372 | 3D at 1524 w1219 h1067 sill z1372 (window)
+  ok   l1_win_mudroom: plan at 1219 w914 h1219 sill z1067 | 3D at 1219 w914 h1219 sill z1067 (window)
+  ok   l1_win_kitchen: plan at 2134 w1829 h1219 sill z1067 | 3D at 2134 w1829 h1219 sill z1067 (window)
+  ok   l1_win_mbath_n: plan at 1524 w1219 h1067 sill z1372 | 3D at 1524 w1219 h1067 sill z1372 (window)
+  ok   l2_win_loft_s: plan at 610 w914 h1524 sill z3962 | 3D at 610 w914 h1524 sill z3962 (window)
+  ok   l2_win_loft_s2: plan at 4420 w762 h1524 sill z3962 | 3D at 4420 w762 h1524 sill z3962 (window)
+  ok   l2_win_great_1: plan at 914 w1829 h1219 sill z3658 | 3D at 914 w1829 h1219 sill z3658 (window)
+  ok   l2_win_great_2: plan at 3962 w1829 h1219 sill z3658 | 3D at 3962 w1829 h1219 sill z3658 (window)
+  ok   l2_win_loft_w: plan at 762 w1219 h1219 sill z3962 | 3D at 762 w1219 h1219 sill z3962 (window)
+  ok   l2_win_bed2_w: plan at 1829 w1219 h1219 sill z4115 | 3D at 1829 w1219 h1219 sill z4115 (window)
+  ok   l2_win_bed2_n: plan at 1524 w1524 h1524 sill z3658 | 3D at 1524 w1524 h1524 sill z3658 (window)
+  ok   l2_win_bath: plan at 762 w914 h1067 sill z4420 | 3D at 762 w914 h1067 sill z4420 (window)
+  ok   l2_win_bed3_n: plan at 1676 w1524 h1524 sill z3658 | 3D at 1676 w1524 h1524 sill z3658 (window)
+  ok   count: plan 19 | 3D 19
+
+EXTERIOR DOORS
+  ok   l1_d_front: plan at 1829 w914 h2134 sill z0 | 3D at 1829 w914 h2134 sill z0 (entry_door)
+  ok   l1_d_living_porch: plan at 3353 w1829 h2134 sill z0 | 3D at 3353 w1829 h2134 sill z0 (glass_door)
+  ok   l1_d_garage_man: plan at 3962 w914 h2134 sill z0 | 3D at 3962 w914 h2134 sill z0 (door)
+  ok   l1_d_kitchen_rear: plan at 5182 w914 h2134 sill z0 | 3D at 5182 w914 h2134 sill z0 (door)
+  ok   l2_d_balcony: plan at 2134 w1829 h2134 sill z3048 | 3D at 2134 w1829 h2134 sill z3048 (glass_door)
+  ok   count: plan 5 | 3D 5
+
+GARAGE DOORS
+  ok   l1_d_garage_1: plan at 914 w2743 h2438 sill z0 | 3D at 914 w2743 h2438 sill z0 (vehicle_door)
+  ok   l1_d_garage_2: plan at 4572 w2743 h2438 sill z0 | 3D at 4572 w2743 h2438 sill z0 (vehicle_door)
+  ok   count: plan 2 | 3D 2
+
+PORCHES
+  ok   l1_porch: plan 40.00' x 12.00' at z-102 (level_01) | 3D footprint diff 0.0000 m2, top z-102
+
+BALCONIES
+  ok   l2_balcony: plan 40.00' x 12.00' at z3023 (level_02) | 3D footprint diff 0.0000 m2, top z3023
+  ok   l2_balcony access: plan door from the house | 3D ['l2_d_balcony']
+
+RAILINGS
+  ok   l2_rail_balcony: plan 4-point path | 3D 4-point path
+
+STAIRS
+  ok   externally relevant: plan 0 exterior, 2 interior (not visible outside) | 3D 0 drawn
+
+ROOFS
+  ok   roof_main: plan base z5791, 4 edges | 3D 2 plane(s) [gable]
+  ok   roof_balcony: plan base z5791, 4 edges | 3D 1 plane(s) [shed]
+  ok   roof_garage: plan base z2743, 4 edges | 3D 1 plane(s) [shed]
+
+INFERRED SUPPORTS
+  ok   post:1: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
+  ok   post:2: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
+  ok   post:3: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
+  ok   post:4: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
+  ok   post:5: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
+
+PROVENANCE
+  ok   element classes: plan plan / derived / inferred | 3D {'plan': 128, 'derived': 15, 'inferred': 11}
+
+RENDERER AUDIT
+  ok   all elements: plan 154 model elements | 3D 154 drawn, worst deviation 50.0 mm (opening:8)
+
+WARNINGS: 
+  [plan issue] roof_main: edge 0 (6096,3658)->(24384,3658) mm, 12500-18250 mm along it: roof underside up to 2.90 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
+  [plan issue] roof_main: edge 1 (24384,3658)->(24384,15850) mm, 0-12000 mm along it: roof underside up to 3.05 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
+  [plan issue] roof_main: edge 2 (24384,15850)->(6096,15850) mm, 0-6000 mm along it: roof underside up to 2.90 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
+  [plan issue] roof_balcony: edge 2 (18288,3658)->(6096,3658) mm, 0-12000 mm along it: roof underside up to 0.15 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
+  [plan issue] roof_main and roof_balcony (with overhangs) overlap over 3.81 m2; surfaces are 343 mm apart there — the plan does not define how these roofs meet.
+ERRORS: none

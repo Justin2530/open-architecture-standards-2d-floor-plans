@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<title>OAS exterior view</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #f7f7f5; font-family: 'Helvetica Neue', Arial, sans-serif; }
+  canvas { display: block; }
+  #overlay { position: absolute; left: 24px; bottom: 20px; color: #111; text-shadow: 0 0 4px rgba(255,255,255,0.9); }
+  #overlay .title { font-size: 22px; font-weight: 700; letter-spacing: 0.02em; }
+  #overlay .view { font-size: 15px; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+  #overlay .disclaimer { font-size: 12px; margin-top: 6px; font-weight: 700; letter-spacing: 0.08em; }
+  #legend { position: absolute; right: 24px; bottom: 20px; background: rgba(255,255,255,0.92); border: 1px solid #ccc; padding: 10px 14px; font-size: 13px; }
+  #legend span { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; border: 1px solid #888; }
+  .hidden { display: none; }
+</style>
+<!-- `three` is served by render.mjs from this package's node_modules (npm install in tools/oas_pipeline/exterior) -->
+<script type="importmap">{ "imports": { "three": "/three/build/three.module.js" } }</script>
+</head>
+<body>
+<div id="overlay"><div class="title"></div><div class="view"></div><div class="disclaimer"></div></div>
+<div id="legend" class="hidden">
+  <div><span style="background:#d9d9d9"></span>plan geometry (from the floor plan)</div>
+  <div><span style="background:#6fa8dc"></span>derived (deterministic from plan data)</div>
+  <div><span style="background:#f29b38"></span>inferred (exterior-design assumption)</div>
+</div>
+<script>addEventListener("error", () => { window.__failed = true; }); addEventListener("unhandledrejection", () => { window.__failed = true; });</script>
+<script type="module" src="renderer.js"></script>
+</body>
+</html>
