@@ -1,0 +1,1488 @@
+{
+  "oas": "1.1.0",
+  "plan_id": "barndominium_40x60_2story_level2",
+  "title": "40x60 Two-Story Barndominium with Attached Garage - Second Floor",
+  "units": {
+    "length": "mm",
+    "angle": "deg"
+  },
+  "levels": [
+    {
+      "id": "level_02",
+      "name": "Second Floor",
+      "elevation_mm": 3048,
+      "is_building_story": true
+    }
+  ],
+  "rooms": [
+    {
+      "id": "l2_balcony",
+      "name": "Covered Balcony",
+      "usage": "balcony",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          },
+          {
+            "x": 6096,
+            "y": 3658
+          }
+        ]
+      },
+      "area_m2": 44.6,
+      "tags": [
+        "exterior",
+        "covered"
+      ]
+    },
+    {
+      "id": "l2_stair",
+      "name": "Stair (open to below)",
+      "usage": "stair",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 6401
+          },
+          {
+            "x": 7163,
+            "y": 6401
+          },
+          {
+            "x": 7163,
+            "y": 10364
+          },
+          {
+            "x": 6096,
+            "y": 10364
+          }
+        ]
+      },
+      "area_m2": 4.23,
+      "tags": [
+        "vertical_circulation",
+        "stairwell"
+      ]
+    },
+    {
+      "id": "l2_loft",
+      "name": "Loft",
+      "usage": "loft",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 3658
+          },
+          {
+            "x": 11582,
+            "y": 3658
+          },
+          {
+            "x": 11582,
+            "y": 10364
+          },
+          {
+            "x": 7163,
+            "y": 10364
+          },
+          {
+            "x": 7163,
+            "y": 6401
+          },
+          {
+            "x": 6096,
+            "y": 6401
+          }
+        ]
+      },
+      "area_m2": 32.56,
+      "tags": [
+        "balcony_access",
+        "overlooks_great_room"
+      ]
+    },
+    {
+      "id": "l2_hall",
+      "name": "Hall",
+      "usage": "circulation",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 10364
+          },
+          {
+            "x": 14630,
+            "y": 10364
+          },
+          {
+            "x": 14630,
+            "y": 11583
+          },
+          {
+            "x": 6096,
+            "y": 11583
+          }
+        ]
+      },
+      "area_m2": 10.4,
+      "tags": [
+        "overlooks_great_room"
+      ]
+    },
+    {
+      "id": "l2_bed2",
+      "name": "Bedroom 2",
+      "usage": "bedroom",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 11583
+          },
+          {
+            "x": 9144,
+            "y": 11583
+          },
+          {
+            "x": 9144,
+            "y": 13107
+          },
+          {
+            "x": 10973,
+            "y": 13107
+          },
+          {
+            "x": 10973,
+            "y": 15850
+          },
+          {
+            "x": 6096,
+            "y": 15850
+          }
+        ]
+      },
+      "area_m2": 18.02,
+      "tags": [
+        "daylit"
+      ]
+    },
+    {
+      "id": "l2_bed2_closet",
+      "name": "Closet",
+      "usage": "closet",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 9144,
+            "y": 11583
+          },
+          {
+            "x": 10973,
+            "y": 11583
+          },
+          {
+            "x": 10973,
+            "y": 13107
+          },
+          {
+            "x": 9144,
+            "y": 13107
+          }
+        ]
+      },
+      "area_m2": 2.79,
+      "tags": [
+        "walk_in"
+      ]
+    },
+    {
+      "id": "l2_bath",
+      "name": "Bathroom",
+      "usage": "bathroom",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 10973,
+            "y": 11583
+          },
+          {
+            "x": 13411,
+            "y": 11583
+          },
+          {
+            "x": 13411,
+            "y": 15850
+          },
+          {
+            "x": 10973,
+            "y": 15850
+          }
+        ]
+      },
+      "area_m2": 10.4,
+      "tags": [
+        "full_bath",
+        "wet_area"
+      ]
+    },
+    {
+      "id": "l2_bed3",
+      "name": "Bedroom 3",
+      "usage": "bedroom",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 13411,
+            "y": 11583
+          },
+          {
+            "x": 16459,
+            "y": 11583
+          },
+          {
+            "x": 16459,
+            "y": 13107
+          },
+          {
+            "x": 18288,
+            "y": 13107
+          },
+          {
+            "x": 18288,
+            "y": 15850
+          },
+          {
+            "x": 13411,
+            "y": 15850
+          }
+        ]
+      },
+      "area_m2": 18.02,
+      "tags": [
+        "daylit"
+      ]
+    },
+    {
+      "id": "l2_bed3_closet",
+      "name": "Closet",
+      "usage": "closet",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 16459,
+            "y": 11583
+          },
+          {
+            "x": 18288,
+            "y": 11583
+          },
+          {
+            "x": 18288,
+            "y": 13107
+          },
+          {
+            "x": 16459,
+            "y": 13107
+          }
+        ]
+      },
+      "area_m2": 2.79,
+      "tags": [
+        "walk_in"
+      ]
+    },
+    {
+      "id": "l2_open_below",
+      "name": "Open to Below",
+      "usage": "void",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 11582,
+            "y": 3658
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          },
+          {
+            "x": 18288,
+            "y": 11583
+          },
+          {
+            "x": 14630,
+            "y": 11583
+          },
+          {
+            "x": 14630,
+            "y": 10364
+          },
+          {
+            "x": 11582,
+            "y": 10364
+          }
+        ]
+      },
+      "area_m2": 49.43,
+      "tags": [
+        "open_to_below",
+        "not_floor_area"
+      ]
+    }
+  ],
+  "walls": [
+    {
+      "id": "l2_w_south_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 3658
+      },
+      "to": {
+        "x": 11582,
+        "y": 3658
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "l2_loft",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_w_south_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 11582,
+        "y": 3658
+      },
+      "to": {
+        "x": 18288,
+        "y": 3658
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "l2_open_below",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_w_west_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 3658
+      },
+      "to": {
+        "x": 6096,
+        "y": 6401
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_loft"
+      ]
+    },
+    {
+      "id": "l2_w_west_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 6401
+      },
+      "to": {
+        "x": 6096,
+        "y": 10364
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_stair"
+      ]
+    },
+    {
+      "id": "l2_w_west_3",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 10364
+      },
+      "to": {
+        "x": 6096,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_w_west_4",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 11583
+      },
+      "to": {
+        "x": 6096,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_bed2"
+      ]
+    },
+    {
+      "id": "l2_w_north_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 15850
+      },
+      "to": {
+        "x": 10973,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_bed2"
+      ]
+    },
+    {
+      "id": "l2_w_north_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 10973,
+        "y": 15850
+      },
+      "to": {
+        "x": 13411,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_bath"
+      ]
+    },
+    {
+      "id": "l2_w_north_3",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 13411,
+        "y": 15850
+      },
+      "to": {
+        "x": 18288,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "exterior",
+        "l2_bed3"
+      ]
+    },
+    {
+      "id": "l2_w_east_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 18288,
+        "y": 3658
+      },
+      "to": {
+        "x": 18288,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "l2_open_below",
+        "exterior"
+      ]
+    },
+    {
+      "id": "l2_w_east_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 18288,
+        "y": 11583
+      },
+      "to": {
+        "x": 18288,
+        "y": 13107
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "l2_bed3_closet",
+        "exterior"
+      ]
+    },
+    {
+      "id": "l2_w_east_3",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 18288,
+        "y": 13107
+      },
+      "to": {
+        "x": 18288,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "adjacent_rooms": [
+        "l2_bed3",
+        "exterior"
+      ]
+    },
+    {
+      "id": "l2_w_y26_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 6096,
+        "y": 11583
+      },
+      "to": {
+        "x": 9144,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed2",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_w_y26_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 9144,
+        "y": 11583
+      },
+      "to": {
+        "x": 10973,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed2_closet",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_w_y26_3",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 10973,
+        "y": 11583
+      },
+      "to": {
+        "x": 13411,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bath",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_w_y26_4",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 13411,
+        "y": 11583
+      },
+      "to": {
+        "x": 14630,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed3",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_w_y26_5",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 14630,
+        "y": 11583
+      },
+      "to": {
+        "x": 16459,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed3",
+        "l2_open_below"
+      ]
+    },
+    {
+      "id": "l2_w_y26_6",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 16459,
+        "y": 11583
+      },
+      "to": {
+        "x": 18288,
+        "y": 11583
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed3_closet",
+        "l2_open_below"
+      ]
+    },
+    {
+      "id": "l2_w_x30_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 9144,
+        "y": 11583
+      },
+      "to": {
+        "x": 9144,
+        "y": 13107
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed2",
+        "l2_bed2_closet"
+      ]
+    },
+    {
+      "id": "l2_w_y31w_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 9144,
+        "y": 13107
+      },
+      "to": {
+        "x": 10973,
+        "y": 13107
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed2",
+        "l2_bed2_closet"
+      ]
+    },
+    {
+      "id": "l2_w_x36_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 10973,
+        "y": 11583
+      },
+      "to": {
+        "x": 10973,
+        "y": 13107
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed2_closet",
+        "l2_bath"
+      ]
+    },
+    {
+      "id": "l2_w_x36_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 10973,
+        "y": 13107
+      },
+      "to": {
+        "x": 10973,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed2",
+        "l2_bath"
+      ]
+    },
+    {
+      "id": "l2_w_x44_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 13411,
+        "y": 11583
+      },
+      "to": {
+        "x": 13411,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bath",
+        "l2_bed3"
+      ]
+    },
+    {
+      "id": "l2_w_x54_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 16459,
+        "y": 11583
+      },
+      "to": {
+        "x": 16459,
+        "y": 13107
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed3",
+        "l2_bed3_closet"
+      ]
+    },
+    {
+      "id": "l2_w_y31e_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 16459,
+        "y": 13107
+      },
+      "to": {
+        "x": 18288,
+        "y": 13107
+      },
+      "unit": "mm",
+      "thickness_mm": 114,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": false,
+      "adjacent_rooms": [
+        "l2_bed3",
+        "l2_bed3_closet"
+      ]
+    }
+  ],
+  "openings": [
+    {
+      "id": "l2_d_balcony",
+      "opening_type": "door",
+      "type_name": "Sliding Door to Balcony 6'-0\"",
+      "in_wall": "l2_w_south_1",
+      "level": "level_02",
+      "position_along_wall_mm": 2134,
+      "width_mm": 1829,
+      "height_mm": 2134,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "l2_loft",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_win_loft_s",
+      "opening_type": "window",
+      "type_name": "Window 3'-0\"",
+      "in_wall": "l2_w_south_1",
+      "level": "level_02",
+      "position_along_wall_mm": 610,
+      "width_mm": 914,
+      "height_mm": 1524,
+      "sill_height_mm": 914,
+      "is_fixed": true,
+      "connects_rooms": [
+        "l2_loft",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_win_loft_s2",
+      "opening_type": "window",
+      "type_name": "Window 2'-6\"",
+      "in_wall": "l2_w_south_1",
+      "level": "level_02",
+      "position_along_wall_mm": 4420,
+      "width_mm": 762,
+      "height_mm": 1524,
+      "sill_height_mm": 914,
+      "is_fixed": true,
+      "connects_rooms": [
+        "l2_loft",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_win_loft_w",
+      "opening_type": "window",
+      "type_name": "Window 4'-0\"",
+      "in_wall": "l2_w_west_1",
+      "level": "level_02",
+      "position_along_wall_mm": 762,
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_height_mm": 914,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "exterior",
+        "l2_loft"
+      ]
+    },
+    {
+      "id": "l2_win_great_1",
+      "opening_type": "window",
+      "type_name": "Great Room Upper Window 6'-0\"",
+      "in_wall": "l2_w_south_2",
+      "level": "level_02",
+      "position_along_wall_mm": 914,
+      "width_mm": 1829,
+      "height_mm": 1219,
+      "sill_height_mm": 610,
+      "is_fixed": true,
+      "connects_rooms": [
+        "l2_open_below",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_win_great_2",
+      "opening_type": "window",
+      "type_name": "Great Room Upper Window 6'-0\"",
+      "in_wall": "l2_w_south_2",
+      "level": "level_02",
+      "position_along_wall_mm": 3962,
+      "width_mm": 1829,
+      "height_mm": 1219,
+      "sill_height_mm": 610,
+      "is_fixed": true,
+      "connects_rooms": [
+        "l2_open_below",
+        "l2_balcony"
+      ]
+    },
+    {
+      "id": "l2_win_bed2_n",
+      "opening_type": "window",
+      "type_name": "Egress Window 5'-0\"",
+      "in_wall": "l2_w_north_1",
+      "level": "level_02",
+      "position_along_wall_mm": 1524,
+      "width_mm": 1524,
+      "height_mm": 1524,
+      "sill_height_mm": 610,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "exterior",
+        "l2_bed2"
+      ]
+    },
+    {
+      "id": "l2_win_bed2_w",
+      "opening_type": "window",
+      "type_name": "Window 4'-0\" (above garage roof)",
+      "in_wall": "l2_w_west_4",
+      "level": "level_02",
+      "position_along_wall_mm": 1829,
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_height_mm": 1067,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "exterior",
+        "l2_bed2"
+      ]
+    },
+    {
+      "id": "l2_win_bath",
+      "opening_type": "window",
+      "type_name": "Privacy Window 3'-0\"",
+      "in_wall": "l2_w_north_2",
+      "level": "level_02",
+      "position_along_wall_mm": 762,
+      "width_mm": 914,
+      "height_mm": 1067,
+      "sill_height_mm": 1372,
+      "is_fixed": true,
+      "connects_rooms": [
+        "exterior",
+        "l2_bath"
+      ]
+    },
+    {
+      "id": "l2_win_bed3_n",
+      "opening_type": "window",
+      "type_name": "Egress Window 5'-0\"",
+      "in_wall": "l2_w_north_3",
+      "level": "level_02",
+      "position_along_wall_mm": 1676,
+      "width_mm": 1524,
+      "height_mm": 1524,
+      "sill_height_mm": 610,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "exterior",
+        "l2_bed3"
+      ]
+    },
+    {
+      "id": "l2_d_bed2",
+      "opening_type": "door",
+      "type_name": "Door 2'-8\"",
+      "in_wall": "l2_w_y26_1",
+      "level": "level_02",
+      "position_along_wall_mm": 1372,
+      "width_mm": 813,
+      "height_mm": 2134,
+      "is_fixed": false,
+      "operation": "swing",
+      "swing_direction": "inward",
+      "hinge_side": "left",
+      "connects_rooms": [
+        "l2_bed2",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_d_bed2_closet",
+      "opening_type": "door",
+      "type_name": "Bypass Closet Door 2'-6\"",
+      "in_wall": "l2_w_x30_1",
+      "level": "level_02",
+      "position_along_wall_mm": 305,
+      "width_mm": 762,
+      "height_mm": 2134,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "l2_bed2",
+        "l2_bed2_closet"
+      ]
+    },
+    {
+      "id": "l2_d_bath",
+      "opening_type": "door",
+      "type_name": "Door 2'-6\"",
+      "in_wall": "l2_w_y26_3",
+      "level": "level_02",
+      "position_along_wall_mm": 610,
+      "width_mm": 762,
+      "height_mm": 2134,
+      "is_fixed": false,
+      "operation": "swing",
+      "swing_direction": "inward",
+      "hinge_side": "left",
+      "connects_rooms": [
+        "l2_bath",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_d_bed3",
+      "opening_type": "door",
+      "type_name": "Door 2'-8\"",
+      "in_wall": "l2_w_y26_4",
+      "level": "level_02",
+      "position_along_wall_mm": 152,
+      "width_mm": 813,
+      "height_mm": 2134,
+      "is_fixed": false,
+      "operation": "swing",
+      "swing_direction": "inward",
+      "hinge_side": "left",
+      "connects_rooms": [
+        "l2_bed3",
+        "l2_hall"
+      ]
+    },
+    {
+      "id": "l2_d_bed3_closet",
+      "opening_type": "door",
+      "type_name": "Bypass Closet Door 2'-6\"",
+      "in_wall": "l2_w_x54_1",
+      "level": "level_02",
+      "position_along_wall_mm": 305,
+      "width_mm": 762,
+      "height_mm": 2134,
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "connects_rooms": [
+        "l2_bed3",
+        "l2_bed3_closet"
+      ]
+    }
+  ],
+  "railings": [
+    {
+      "id": "l2_rail_stairwell",
+      "type_name": "IfcRailing",
+      "level": "level_02",
+      "host_type": "floor",
+      "path": {
+        "unit": "mm",
+        "closed": false,
+        "points": [
+          {
+            "x": 6096,
+            "y": 6401
+          },
+          {
+            "x": 7163,
+            "y": 6401
+          },
+          {
+            "x": 7163,
+            "y": 10364
+          }
+        ]
+      },
+      "base_offset_mm": 0
+    },
+    {
+      "id": "l2_rail_loft_overlook",
+      "type_name": "IfcRailing",
+      "level": "level_02",
+      "host_type": "floor",
+      "path": {
+        "unit": "mm",
+        "closed": false,
+        "points": [
+          {
+            "x": 11582,
+            "y": 3658
+          },
+          {
+            "x": 11582,
+            "y": 10364
+          },
+          {
+            "x": 14630,
+            "y": 10364
+          },
+          {
+            "x": 14630,
+            "y": 11583
+          }
+        ]
+      },
+      "base_offset_mm": 0
+    },
+    {
+      "id": "l2_rail_balcony",
+      "type_name": "IfcRailing",
+      "level": "level_02",
+      "host_type": "floor",
+      "path": {
+        "unit": "mm",
+        "closed": false,
+        "points": [
+          {
+            "x": 6096,
+            "y": 3658
+          },
+          {
+            "x": 6096,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          }
+        ]
+      },
+      "base_offset_mm": 0
+    }
+  ],
+  "floor_slabs": [
+    {
+      "id": "slab_l2_floor",
+      "type_name": "IfcSlab",
+      "level": "level_02",
+      "height_above_level_mm": 0,
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 3658
+          },
+          {
+            "x": 11582,
+            "y": 3658
+          },
+          {
+            "x": 11582,
+            "y": 10364
+          },
+          {
+            "x": 14630,
+            "y": 10364
+          },
+          {
+            "x": 14630,
+            "y": 11583
+          },
+          {
+            "x": 18288,
+            "y": 11583
+          },
+          {
+            "x": 18288,
+            "y": 15850
+          },
+          {
+            "x": 6096,
+            "y": 15850
+          },
+          {
+            "x": 6096,
+            "y": 10364
+          },
+          {
+            "x": 7163,
+            "y": 10364
+          },
+          {
+            "x": 7163,
+            "y": 6401
+          },
+          {
+            "x": 6096,
+            "y": 6401
+          }
+        ]
+      }
+    },
+    {
+      "id": "slab_l2_balcony",
+      "type_name": "IfcSlab",
+      "level": "level_02",
+      "height_above_level_mm": -25,
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          },
+          {
+            "x": 6096,
+            "y": 3658
+          }
+        ]
+      }
+    }
+  ],
+  "roofs": [
+    {
+      "id": "roof_main",
+      "type_name": "IfcRoof",
+      "level": "level_02",
+      "level_offset_mm": 2743,
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 3658
+          },
+          {
+            "x": 24384,
+            "y": 3658
+          },
+          {
+            "x": 24384,
+            "y": 15850
+          },
+          {
+            "x": 6096,
+            "y": 15850
+          }
+        ]
+      },
+      "slope_angles": [
+        18.43,
+        0.0,
+        18.43,
+        0.0
+      ],
+      "defines_slope": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "eave_overhang_mm": [
+        305,
+        305,
+        305,
+        0
+      ]
+    },
+    {
+      "id": "roof_balcony",
+      "type_name": "IfcRoof",
+      "level": "level_02",
+      "level_offset_mm": 2743,
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          },
+          {
+            "x": 6096,
+            "y": 3658
+          }
+        ]
+      },
+      "slope_angles": [
+        4.76,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "defines_slope": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "eave_overhang_mm": [
+        305,
+        305,
+        0,
+        305
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "l2_balcony",
+      "to": "l2_loft",
+      "type": "single_access"
+    },
+    {
+      "from": "l2_stair",
+      "to": "l2_hall",
+      "type": "direct"
+    },
+    {
+      "from": "l2_loft",
+      "to": "l2_hall",
+      "type": "direct"
+    },
+    {
+      "from": "l2_hall",
+      "to": "l2_bed2",
+      "type": "direct"
+    },
+    {
+      "from": "l2_hall",
+      "to": "l2_bath",
+      "type": "single_access"
+    },
+    {
+      "from": "l2_hall",
+      "to": "l2_bed3",
+      "type": "direct"
+    },
+    {
+      "from": "l2_bed2",
+      "to": "l2_bed2_closet",
+      "type": "single_access"
+    },
+    {
+      "from": "l2_bed3",
+      "to": "l2_bed3_closet",
+      "type": "single_access"
+    }
+  ],
+  "metadata": {
+    "generated_by": "Claude Code (OAS skills: oas-layout, oas-geometry, oas-core)",
+    "timestamp": "2026-09-28T00:00:00Z",
+    "notes": "Second Floor extract of barndominium_40x60_2story. 40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Upper floor covers the west 40' of the house; the master suite below the east 20' has attic/mechanical space above."
+  }
+}
