@@ -1,463 +1,473 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const SVG_NS = 'http://www.w3.org/2000/svg';
     const fileInput = document.getElementById('file-upload');
     const emptyState = document.getElementById('empty-state');
     const svgWrapper = document.getElementById('svg-wrapper');
     const svgElement = document.getElementById('plan-svg');
-    const zoomInBtn = document.getElementById('zoom-in');
-    const zoomOutBtn = document.getElementById('zoom-out');
-    const fitViewBtn = document.getElementById('fit-view');
+    const levelSelector = document.getElementById('level-selector');
+    const unitSelector = document.getElementById('unit-selector');
 
-    let currentScale = 1;
+    const EXTERIOR_USAGES = ['porch', 'balcony', 'deck', 'patio', 'terrace', 'exterior'];
+    const SERVICE_USAGES = ['garage', 'mechanical', 'utility'];
+    const VOID_USAGES = ['void', 'open_to_below'];
+
+    let plan = null;
+    let currentLevel = null;   // level id, or null when the plan has no levels
+    let units = 'imperial';
+    let frame = null;          // drawing extents shared by all levels so floors stay aligned
     let viewBox = { x: 0, y: 0, width: 1000, height: 1000 };
-    let originalViewBox = null; // Store original bounds for fit-to-content
+    let originalViewBox = null;
     let isDragging = false;
     let startPan = { x: 0, y: 0 };
 
     fileInput.addEventListener('change', handleFileUpload);
-    zoomInBtn.addEventListener('click', () => zoom(1.2));
-    zoomOutBtn.addEventListener('click', () => zoom(0.8));
-    fitViewBtn.addEventListener('click', fitToContent);
+    document.getElementById('zoom-in').addEventListener('click', () => zoom(1.2));
+    document.getElementById('zoom-out').addEventListener('click', () => zoom(1 / 1.2));
+    document.getElementById('fit-view').addEventListener('click', fitToContent);
+    unitSelector.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+        units = btn.dataset.units;
+        unitSelector.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+        if (plan) renderPlan();
+    }));
 
-    // Pan functionality
     svgElement.addEventListener('mousedown', startDrag);
     svgElement.addEventListener('mousemove', drag);
     svgElement.addEventListener('mouseup', endDrag);
     svgElement.addEventListener('mouseleave', endDrag);
-    svgElement.addEventListener('wheel', handleWheel);
+    svgElement.addEventListener('wheel', handleWheel, { passive: false });
 
     function handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
+            let parsed;
             try {
-                const plan = JSON.parse(e.target.result);
-                renderPlan(plan);
+                parsed = JSON.parse(e.target.result);
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 alert('Invalid JSON file');
+                return;
             }
+            loadPlan(parsed);
         };
         reader.readAsText(file);
+        event.target.value = '';
     }
 
-    function renderPlan(plan) {
-        // Clear existing SVG content
-        svgElement.innerHTML = '';
+    // ------------------------------------------------------------------ helpers
+    function el(tag, attrs = {}, parent = null) {
+        const node = document.createElementNS(SVG_NS, tag);
+        Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
+        if (parent) parent.appendChild(node);
+        return node;
+    }
 
-        // Hide empty state, show SVG
+    function sortedLevels() {
+        return (plan.levels || []).slice().sort((a, b) => (a.elevation_mm || 0) - (b.elevation_mm || 0));
+    }
+
+    function onLevel(item) {
+        return !currentLevel || !item.level || item.level === currentLevel;
+    }
+
+    function fmtLen(mm) {
+        if (units === 'metric') return (mm / 1000).toFixed(2);
+        const inches = Math.round(mm / 25.4);
+        return `${Math.floor(inches / 12)}'-${inches % 12}"`;
+    }
+
+    function fmtDims(w, h) {
+        return units === 'metric' ? `${fmtLen(w)} × ${fmtLen(h)} m` : `${fmtLen(w)} × ${fmtLen(h)}`;
+    }
+
+    function fmtArea(m2) {
+        return units === 'metric' ? `${m2.toFixed(1)} m²` : `${Math.round(m2 * 10.7639).toLocaleString()} sf`;
+    }
+
+    function polygonArea(pts) {
+        let a = 0;
+        pts.forEach((p, i) => { const q = pts[(i + 1) % pts.length]; a += p.x * q.y - q.x * p.y; });
+        return Math.abs(a) / 2;
+    }
+
+    function axisRect(pts) {
+        if (pts.length !== 4) return null;
+        const ok = pts.every((p, i) => { const q = pts[(i + 1) % 4]; return p.x === q.x || p.y === q.y; });
+        if (!ok) return null;
+        const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+        return { w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+    }
+
+    function pointInPolygon(x, y, pts) {
+        let inside = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            const a = pts[i], b = pts[j];
+            if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+        }
+        return inside;
+    }
+
+    function distToSegment(x, y, a, b) {
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const len2 = dx * dx + dy * dy;
+        const t = len2 ? Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / len2)) : 0;
+        return Math.hypot(x - (a.x + t * dx), y - (a.y + t * dy));
+    }
+
+    // Most open interior point of a polygon (grid search) — keeps labels inside L-shaped rooms.
+    function labelAnchor(pts) {
+        if (axisRect(pts)) {
+            const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+            return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+        }
+        const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+        const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+        const N = 40;
+        let best = null, bestD = -1;
+        for (let i = 0; i <= N; i++) {
+            for (let j = 0; j <= N; j++) {
+                const x = minX + (maxX - minX) * i / N, y = minY + (maxY - minY) * j / N;
+                if (!pointInPolygon(x, y, pts)) continue;
+                let d = Infinity;
+                pts.forEach((p, k) => { d = Math.min(d, distToSegment(x, y, p, pts[(k + 1) % pts.length])); });
+                if (d > bestD) { bestD = d; best = { x, y }; }
+            }
+        }
+        return best || { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+    }
+
+    // Clear half-spans from a point to the polygon boundary, horizontally and vertically.
+    function clearSpans(x, y, pts) {
+        let left = Infinity, right = Infinity, down = Infinity, up = Infinity;
+        pts.forEach((a, i) => {
+            const b = pts[(i + 1) % pts.length];
+            if ((a.y > y) !== (b.y > y)) {
+                const xi = a.x + (y - a.y) * (b.x - a.x) / (b.y - a.y);
+                if (xi >= x) right = Math.min(right, xi - x); else left = Math.min(left, x - xi);
+            }
+            if ((a.x > x) !== (b.x > x)) {
+                const yi = a.y + (x - a.x) * (b.y - a.y) / (b.x - a.x);
+                if (yi >= y) up = Math.min(up, yi - y); else down = Math.min(down, y - yi);
+            }
+        });
+        return { w: 2 * Math.min(left, right), h: 2 * Math.min(up, down) };
+    }
+
+    function wrapTwoLines(text) {
+        const words = text.split(' ');
+        if (words.length < 2) return [text];
+        let best = null;
+        for (let i = 1; i < words.length; i++) {
+            const a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
+            const score = Math.max(a.length, b.length);
+            if (!best || score < best.score) best = { score, lines: [a, b] };
+        }
+        return best.lines;
+    }
+
+    // ------------------------------------------------------------------ loading
+    function loadPlan(parsed) {
+        plan = parsed;
+        const levels = sortedLevels();
+        currentLevel = levels.length ? levels[0].id : null;
+        buildLevelSelector(levels);
+        frame = computeFrame();
         emptyState.classList.add('hidden');
         svgWrapper.classList.remove('hidden');
+        renderPlan();
+        fitToContent();
+    }
 
-        // Render Rooms
-        if (plan.rooms) {
-            plan.rooms.forEach(room => {
-                renderRoom(room);
+    function buildLevelSelector(levels) {
+        levelSelector.innerHTML = '';
+        levelSelector.classList.toggle('hidden', levels.length < 2);
+        levels.forEach(level => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = level.name || level.id;
+            btn.dataset.level = level.id;
+            btn.setAttribute('role', 'tab');
+            btn.classList.toggle('active', level.id === currentLevel);
+            btn.addEventListener('click', () => {
+                currentLevel = level.id;
+                levelSelector.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+                renderPlan();
             });
-        }
+            levelSelector.appendChild(btn);
+        });
+    }
 
-        // Prepare openings map by wall for wall rendering (so walls can be cut where openings are)
+    function computeFrame() {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        const add = (p, pad = 0) => {
+            minX = Math.min(minX, p.x - pad); maxX = Math.max(maxX, p.x + pad);
+            minY = Math.min(minY, p.y - pad); maxY = Math.max(maxY, p.y + pad);
+        };
+        (plan.rooms || []).forEach(r => (r.boundary_polygon?.points || []).forEach(p => add(p)));
+        (plan.walls || []).forEach(w => { add(w.from, (w.thickness_mm || 200) / 2); add(w.to, (w.thickness_mm || 200) / 2); });
+        if (!isFinite(minX)) { minX = minY = 0; maxX = maxY = 10000; }
+        const span = Math.max(maxX - minX, maxY - minY);
+        const text = Math.min(Math.max(span / 110, 110), 320); // base label height in plan mm
+        return { minX, minY, maxX, maxY, text, titleHeight: text * 9 };
+    }
+
+    // ------------------------------------------------------------------ rendering
+    function renderPlan() {
+        svgElement.innerHTML = '';
+        const defs = el('defs', {}, svgElement);
+        const hatch = el('pattern', { id: 'hatch-exterior', patternUnits: 'userSpaceOnUse', width: 260, height: 260,
+            patternTransform: 'rotate(45)' }, defs);
+        el('rect', { width: 260, height: 260, fill: '#fbfbfa' }, hatch);
+        el('line', { x1: 0, y1: 0, x2: 0, y2: 260, stroke: '#cfcfcf', 'stroke-width': 14 }, hatch);
+
+        // Plan geometry lives in OAS coordinates (Y up); flip once at the render boundary.
+        const geo = el('g', { id: 'oas-plan', transform: `translate(0, ${frame.maxY}) scale(1, -1)` }, svgElement);
+        const gRooms = el('g', { id: 'oas-rooms' }, geo);
+        const gWalls = el('g', { id: 'oas-walls' }, geo);
+        const gOpenings = el('g', { id: 'oas-openings' }, geo);
+        const gCirc = el('g', { id: 'oas-circulation' }, geo);
+        const gLabels = el('g', { id: 'oas-labels' }, svgElement); // screen orientation
+
+        const rooms = (plan.rooms || []).filter(onLevel);
+        const walls = (plan.walls || []).filter(onLevel);
+        const wallsById = Object.fromEntries((plan.walls || []).map(w => [w.id, w]));
+        const openings = (plan.openings || []).filter(o => onLevel(o) && wallsById[o.in_wall] && onLevel(wallsById[o.in_wall]));
+
+        rooms.forEach((room, i) => renderRoom(gRooms, defs, room, i));
+
         const openingsByWall = {};
-        if (plan.openings) {
-            plan.openings.forEach(opening => {
-                if (!openingsByWall[opening.in_wall]) openingsByWall[opening.in_wall] = [];
-                openingsByWall[opening.in_wall].push(opening);
-            });
-        }
+        openings.forEach(o => (openingsByWall[o.in_wall] = openingsByWall[o.in_wall] || []).push(o));
+        walls.forEach(w => renderWall(gWalls, w, openingsByWall[w.id] || []));
+        openings.forEach(o => renderOpening(gOpenings, o, wallsById[o.in_wall]));
+        (plan.railings || []).filter(onLevel).forEach(r => renderRailing(gCirc, r));
 
-        // Render Walls (cut segments where openings exist)
-        if (plan.walls) {
-            plan.walls.forEach(wall => {
-                renderWall(wall, openingsByWall[wall.id] || []);
-            });
-        }
-
-        // Render Openings
-        if (plan.openings) {
-            plan.openings.forEach(opening => {
-                renderOpening(opening, plan.walls);
-            });
-        }
-
-        // OAS Y-up → screen Y-down: invert Y at the render boundary so
-        // high-data-Y (north per OAS spec) appears at the top of the screen.
-        // Source data is untouched per oas-render rule.
-        let maxY = -Infinity;
-        if (plan.rooms) {
-            plan.rooms.forEach(room => {
-                if (room.boundary_polygon && room.boundary_polygon.points) {
-                    room.boundary_polygon.points.forEach(p => { if (p.y > maxY) maxY = p.y; });
-                }
-            });
-        }
-        if (maxY > -Infinity) {
-            const oasRoot = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            oasRoot.setAttribute('transform', `translate(0, ${maxY}) scale(1, -1)`);
-            while (svgElement.firstChild) oasRoot.appendChild(svgElement.firstChild);
-            svgElement.appendChild(oasRoot);
-
-            // Counter-flip text labels so they remain upright
-            oasRoot.querySelectorAll('text').forEach(t => {
-                const tx = parseFloat(t.getAttribute('x')) || 0;
-                const ty = parseFloat(t.getAttribute('y')) || 0;
-                t.setAttribute('transform', `translate(${tx}, ${ty}) scale(1, -1) translate(${-tx}, ${-ty})`);
-            });
-        }
-
-        // Calculate bounds and fit view
-        calculateBounds(plan);
+        rooms.forEach(room => renderLabel(gLabels, room));
+        renderTitleBlock();
     }
 
-    function renderRoom(room) {
+    function roomClass(room) {
+        const usage = (room.usage || '').toLowerCase();
+        const tags = room.tags || [];
+        if (VOID_USAGES.includes(usage) || tags.includes('open_to_below')) return 'room-void';
+        if (EXTERIOR_USAGES.includes(usage) || tags.includes('exterior')) return 'room-exterior';
+        if (SERVICE_USAGES.includes(usage)) return 'room-service';
+        return '';
+    }
+
+    function roomSummary(room) {
+        const pts = room.boundary_polygon.points;
+        const rect = axisRect(pts);
+        const area = room.area_m2 != null ? room.area_m2 : polygonArea(pts) / 1e6;
+        return { dims: rect ? fmtDims(rect.w, rect.h) : null, area: fmtArea(area) };
+    }
+
+    function renderRoom(parent, defs, room, index) {
         if (!room.boundary_polygon || !room.boundary_polygon.points) return;
+        const pts = room.boundary_polygon.points;
+        const cls = roomClass(room);
+        const polygon = el('polygon', { points: pts.map(p => `${p.x},${p.y}`).join(' '),
+            class: `room-polygon ${cls}`.trim(), id: room.id }, parent);
+        const s = roomSummary(room);
+        el('title', {}, polygon).textContent = `${room.name || room.id}${s.dims ? ' — ' + s.dims : ''} (${s.area})`;
 
-        const points = room.boundary_polygon.points.map(p => `${p.x},${p.y}`).join(' ');
-
-        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-        polygon.setAttribute('points', points);
-        polygon.setAttribute('class', 'room-polygon');
-        polygon.setAttribute('id', room.id);
-
-        // Add title for hover tooltip
-        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        title.textContent = `${room.name} (${room.area_m2} m²)`;
-        polygon.appendChild(title);
-
-        svgElement.appendChild(polygon);
-
-        // Add Room Label (Centroid approximation)
-        const centroid = getPolygonCentroid(room.boundary_polygon.points);
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', centroid.x);
-        text.setAttribute('y', centroid.y);
-        text.setAttribute('class', 'room-label');
-        text.textContent = room.name;
-        svgElement.appendChild(text);
+        if (cls === 'room-void') {
+            // Conventional "open to below" cross, clipped to the room outline.
+            const clipId = `clip-${index}`;
+            const clip = el('clipPath', { id: clipId }, defs);
+            el('polygon', { points: pts.map(p => `${p.x},${p.y}`).join(' ') }, clip);
+            const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+            const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+            const g = el('g', { 'clip-path': `url(#${clipId})` }, parent);
+            el('line', { x1: x0, y1: y0, x2: x1, y2: y1, class: 'void-cross' }, g);
+            el('line', { x1: x0, y1: y1, x2: x1, y2: y0, class: 'void-cross' }, g);
+        }
     }
 
-    function renderWall(wall, openings = []) {
-        // If there are no openings, draw the full wall line
-        if (!openings || openings.length === 0) {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', wall.from.x);
-            line.setAttribute('y1', wall.from.y);
-            line.setAttribute('x2', wall.to.x);
-            line.setAttribute('y2', wall.to.y);
-            line.setAttribute('stroke-width', wall.thickness_mm);
-            line.setAttribute('class', 'wall-line');
-            svgElement.appendChild(line);
+    function renderWall(parent, wall, openings) {
+        const dx = wall.to.x - wall.from.x, dy = wall.to.y - wall.from.y;
+        const len = Math.hypot(dx, dy);
+        if (!len) return;
+        const ux = dx / len, uy = dy / len;
+        const t = wall.thickness_mm || 200;
+        const cuts = openings
+            .map(o => ({ start: Math.max(0, o.position_along_wall_mm), end: Math.min(len, o.position_along_wall_mm + o.width_mm) }))
+            .sort((a, b) => a.start - b.start);
+        const merged = [];
+        cuts.forEach(c => {
+            const last = merged[merged.length - 1];
+            if (last && c.start <= last.end) last.end = Math.max(last.end, c.end); else merged.push({ ...c });
+        });
+        const segment = (a, b) => el('line', {
+            x1: wall.from.x + ux * a, y1: wall.from.y + uy * a, x2: wall.from.x + ux * b, y2: wall.from.y + uy * b,
+            'stroke-width': t, class: 'wall-line' }, parent);
+        let cursor = 0;
+        merged.forEach(c => { if (c.start > cursor) segment(cursor, c.start); cursor = Math.max(cursor, c.end); });
+        if (cursor < len) segment(cursor, len);
+    }
+
+    function renderOpening(parent, opening, wall) {
+        const dx = wall.to.x - wall.from.x, dy = wall.to.y - wall.from.y;
+        const len = Math.hypot(dx, dy);
+        const ux = dx / len, uy = dy / len;
+        const nx = -uy, ny = ux; // left normal of the wall's from->to direction
+        const t = wall.thickness_mm || 200;
+        const W = opening.width_mm || 0;
+        const s = opening.position_along_wall_mm || 0;
+        const A = { x: wall.from.x + ux * s, y: wall.from.y + uy * s };
+        const B = { x: A.x + ux * W, y: A.y + uy * W };
+        const off = (p, k) => ({ x: p.x + nx * k, y: p.y + ny * k });
+        const line = (p, q, cls, g) => el('line', { x1: p.x, y1: p.y, x2: q.x, y2: q.y, class: cls }, g);
+
+        const g = el('g', { class: 'opening-group', id: opening.id }, parent);
+        const op = (opening.operation || '').toLowerCase();
+        el('title', {}, g).textContent = `${opening.type_name || opening.opening_type}${op ? ` (${op})` : ''} — ${fmtLen(W)}${units === 'metric' ? ' m' : ''}`;
+        el('line', { x1: A.x, y1: A.y, x2: B.x, y2: B.y, 'stroke-width': t + 6, class: 'opening-gap' }, g);
+        // jambs
+        line(off(A, t / 2), off(A, -t / 2), 'door-jamb', g);
+        line(off(B, t / 2), off(B, -t / 2), 'door-jamb', g);
+
+        if (opening.opening_type === 'window') {
+            line(off(A, t / 2), off(B, t / 2), 'window-line', g);
+            line(A, B, 'window-line', g);
+            line(off(A, -t / 2), off(B, -t / 2), 'window-line', g);
             return;
         }
-
-        // Otherwise, split the wall into segments that exclude opening extents
-        const dx = wall.to.x - wall.from.x;
-        const dy = wall.to.y - wall.from.y;
-        const wallLength = Math.sqrt(dx * dx + dy * dy);
-        const unitX = dx / wallLength;
-        const unitY = dy / wallLength;
-
-        // Build an array of cut ranges [start, end] along the wall (in mm from wall.from)
-        const cuts = openings.map(op => {
-            const start = op.position_along_wall_mm;
-            const end = op.position_along_wall_mm + op.width_mm;
-            return { start: Math.max(0, start), end: Math.min(wallLength, end) };
-        }).sort((a, b) => a.start - b.start);
-
-        // Merge overlapping cuts
-        const mergedCuts = [];
-        cuts.forEach(c => {
-            if (mergedCuts.length === 0) {
-                mergedCuts.push(c);
-            } else {
-                const last = mergedCuts[mergedCuts.length - 1];
-                if (c.start <= last.end) {
-                    last.end = Math.max(last.end, c.end);
-                } else {
-                    mergedCuts.push(c);
-                }
-            }
-        });
-
-        // Walk along the wall and draw segments between cuts
-        let cursor = 0;
-        mergedCuts.forEach(cut => {
-            if (cut.start > cursor) {
-                // draw segment from cursor to cut.start
-                const x1 = wall.from.x + unitX * cursor;
-                const y1 = wall.from.y + unitY * cursor;
-                const x2 = wall.from.x + unitX * cut.start;
-                const y2 = wall.from.y + unitY * cut.start;
-                const segment = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                segment.setAttribute('x1', x1);
-                segment.setAttribute('y1', y1);
-                segment.setAttribute('x2', x2);
-                segment.setAttribute('y2', y2);
-                segment.setAttribute('stroke-width', wall.thickness_mm);
-                segment.setAttribute('class', 'wall-line');
-                svgElement.appendChild(segment);
-            }
-            cursor = Math.max(cursor, cut.end);
-        });
-
-        // Draw last segment after last cut, if any
-        if (cursor < wallLength) {
-            const x1 = wall.from.x + unitX * cursor;
-            const y1 = wall.from.y + unitY * cursor;
-            const x2 = wall.to.x;
-            const y2 = wall.to.y;
-            const segment = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            segment.setAttribute('x1', x1);
-            segment.setAttribute('y1', y1);
-            segment.setAttribute('x2', x2);
-            segment.setAttribute('y2', y2);
-            segment.setAttribute('stroke-width', wall.thickness_mm);
-            segment.setAttribute('class', 'wall-line');
-            svgElement.appendChild(segment);
+        if (opening.opening_type !== 'door') {
+            line(A, B, 'door-overhead', g);
+            return;
         }
-    }
-
-    function renderOpening(opening, walls) {
-        const wall = walls.find(w => w.id === opening.in_wall);
-        if (!wall) return;
-
-        // Calculate position based on wall vector
-        const dx = wall.to.x - wall.from.x;
-        const dy = wall.to.y - wall.from.y;
-        const wallLength = Math.sqrt(dx * dx + dy * dy);
-
-        const unitX = dx / wallLength;
-        const unitY = dy / wallLength;
-
-        // Perpendicular vector (for door swing direction)
-        const perpX = -unitY;
-        const perpY = unitX;
-
-        // Actual opening start/end (used for masking the wall)
-        const startDistRaw = opening.position_along_wall_mm || 0;
-        const startX = wall.from.x + unitX * startDistRaw;
-        const startY = wall.from.y + unitY * startDistRaw;
-        const endX = startX + unitX * (opening.width_mm || 0);
-        const endY = startY + unitY * (opening.width_mm || 0);
-
-        // Compute visualized (smaller) opening centered inside the real opening
-        const effectiveWidth = opening.width_mm || 0;
-        // Use full opening width for visualization (no reduction)
-        const visualWidth = effectiveWidth;
-        let visualStartDist, visualEndDist;
-        if (opening.hinge_side === 'right') {
-            // anchor visual to the hinge at the end
-            visualEndDist = startDistRaw + effectiveWidth;
-            visualStartDist = visualEndDist - visualWidth;
+        if (op === 'swing') {
+            const hingeAtEnd = opening.hinge_side === 'right';
+            const hinge = hingeAtEnd ? B : A;
+            const closed = hingeAtEnd ? A : B;
+            const dir = opening.swing_direction === 'outward' ? -1 : 1;
+            const open = off(hinge, dir * W);
+            line(hinge, open, 'door-leaf', g);
+            const cross = (closed.x - hinge.x) * (open.y - hinge.y) - (closed.y - hinge.y) * (open.x - hinge.x);
+            el('path', { d: `M ${closed.x} ${closed.y} A ${W} ${W} 0 0 ${cross > 0 ? 1 : 0} ${open.x} ${open.y}`,
+                class: 'door-swing-arc' }, g);
+        } else if (op === 'sliding' || op === 'slide' || op === 'folding') {
+            const panel = W * 0.55, k = t / 5;
+            line(off(A, k), off({ x: A.x + ux * panel, y: A.y + uy * panel }, k), 'door-leaf', g);
+            line(off({ x: B.x - ux * panel, y: B.y - uy * panel }, -k), off(B, -k), 'door-leaf', g);
         } else {
-            // default: hinge at start side, anchor visual at real start
-            visualStartDist = startDistRaw;
-            visualEndDist = visualStartDist + visualWidth;
+            // Overhead / unspecified operation: dashed line across the opening.
+            line(A, B, 'door-overhead', g);
         }
-        const visualStartX = wall.from.x + unitX * visualStartDist;
-        const visualStartY = wall.from.y + unitY * visualStartDist;
-        const visualEndX = wall.from.x + unitX * visualEndDist;
-        const visualEndY = wall.from.y + unitY * visualEndDist;
-
-        // Create a group for this opening
-        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        group.setAttribute('class', 'opening-group');
-        group.setAttribute('id', opening.id);
-
-        // Add title for tooltip
-        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        const operationText = opening.operation ? ` (${opening.operation})` : '';
-        title.textContent = `${opening.opening_type}${operationText} - ${opening.width_mm}mm`;
-        group.appendChild(title);
-
-        if (opening.opening_type === 'door') {
-            renderDoor(group, opening, startX, startY, endX, endY, visualStartX, visualStartY, visualEndX, visualEndY, unitX, unitY, perpX, perpY, wall);
-        } else if (opening.opening_type === 'window') {
-            renderWindow(group, opening, startX, startY, endX, endY, visualStartX, visualStartY, visualEndX, visualEndY, unitX, unitY, perpX, perpY, wall);
-        } else {
-            // Default rendering for unknown types
-            renderDefaultOpening(group, opening, startX, startY, endX, endY, wall);
-        }
-
-        svgElement.appendChild(group);
     }
 
-    function renderDoor(group, opening, startX, startY, endX, endY, vStartX, vStartY, vEndX, vEndY, unitX, unitY, perpX, perpY, wall) {
-        const width = opening.width_mm;
-
-        // Draw the opening gap (mask) using the actual start/end
-        const gap = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        gap.setAttribute('x1', startX);
-        gap.setAttribute('y1', startY);
-        gap.setAttribute('x2', endX);
-        gap.setAttribute('y2', endY);
-        gap.setAttribute('stroke-width', wall.thickness_mm + 2);
-        gap.setAttribute('class', 'door-gap');
-        group.appendChild(gap);
-
-        // Determine swing direction multiplier
-        const swingDir = opening.swing_direction === 'outward' ? -1 : 1;
-
-        // Determine hinge position (use visual coordinates for hinge/leaf placement)
-        let hingeX, hingeY, leafEndX, leafEndY;
-        if (opening.hinge_side === 'right') {
-            hingeX = vEndX;
-            hingeY = vEndY;
-            leafEndX = vStartX;
-            leafEndY = vStartY;
-        } else {
-            // Default to left
-            hingeX = vStartX;
-            hingeY = vStartY;
-            leafEndX = vEndX;
-            leafEndY = vEndY;
-        }
-
-        // Draw door leaf (closed position) using visual extents
-        const leaf = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        leaf.setAttribute('x1', hingeX);
-        leaf.setAttribute('y1', hingeY);
-        leaf.setAttribute('x2', leafEndX);
-        leaf.setAttribute('y2', leafEndY);
-        leaf.setAttribute('stroke-width', '30');
-        leaf.setAttribute('stroke', '#2563eb');
-        leaf.setAttribute('class', 'door-leaf');
-        group.appendChild(leaf);
-
-        // Draw swing arc (if operation is swing) using visual hinge and visual width
-        if (opening.operation === 'swing') {
-            const visualWidth = Math.hypot(vEndX - vStartX, vEndY - vStartY);
-            const arcEndX = hingeX + perpX * visualWidth * swingDir;
-            const arcEndY = hingeY + perpY * visualWidth * swingDir;
-
-            // Calculate sweep flag based on hinge side and swing direction
-            let sweepFlag;
-            if (opening.hinge_side === 'right') {
-                sweepFlag = swingDir > 0 ? 0 : 1;
-            } else {
-                sweepFlag = swingDir > 0 ? 1 : 0;
-            }
-
-            const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            const pathData = `M ${leafEndX} ${leafEndY} A ${visualWidth} ${visualWidth} 0 0 ${sweepFlag} ${arcEndX} ${arcEndY}`;
-            arc.setAttribute('d', pathData);
-            arc.setAttribute('fill', 'none');
-            arc.setAttribute('stroke', '#3b82f6');
-            arc.setAttribute('stroke-width', '15');
-            arc.setAttribute('stroke-dasharray', '50,30');
-            arc.setAttribute('class', 'door-swing-arc');
-            arc.setAttribute('opacity', '0.6');
-            group.appendChild(arc);
-
-            // Draw dashed connector from arc end to the hinge (end of the visual solid line)
-            const connector = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            connector.setAttribute('x1', arcEndX);
-            connector.setAttribute('y1', arcEndY);
-            connector.setAttribute('x2', hingeX);
-            connector.setAttribute('y2', hingeY);
-            connector.setAttribute('class', 'door-connector');
-            group.appendChild(connector);
-        }
-
-        // Hinge circle removed — arc and leaf indicate hinge/direction
+    function renderRailing(parent, railing) {
+        const pts = (railing.path?.points || []).map(p => `${p.x},${p.y}`).join(' ');
+        if (!pts) return;
+        const g = el('g', { class: 'railing', id: railing.id }, parent);
+        el('title', {}, g).textContent = railing.type_name || 'Railing';
+        // Thin double line: dark stroke with a lighter core.
+        el('polyline', { points: pts, fill: 'none', stroke: '#111', 'stroke-width': 70, 'stroke-linejoin': 'miter' }, g);
+        el('polyline', { points: pts, fill: 'none', stroke: '#fff', 'stroke-width': 40, 'stroke-linejoin': 'miter' }, g);
     }
 
-    function renderWindow(group, opening, startX, startY, endX, endY, vStartX, vStartY, vEndX, vEndY, unitX, unitY, perpX, perpY, wall) {
-        // Draw window opening (mask) using real start/end
-        const gap = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        gap.setAttribute('x1', startX);
-        gap.setAttribute('y1', startY);
-        gap.setAttribute('x2', endX);
-        gap.setAttribute('y2', endY);
-        gap.setAttribute('stroke-width', wall.thickness_mm + 2);
-        gap.setAttribute('class', 'window-gap');
-        group.appendChild(gap);
+    function renderLabel(parent, room) {
+        const pts = room.boundary_polygon?.points;
+        if (!pts || pts.length < 3) return;
+        const anchor = labelAnchor(pts);
+        const spans = clearSpans(anchor.x, anchor.y, pts);
+        const sx = anchor.x, sy = frame.maxY - anchor.y; // screen coordinates
+        const name = room.name || room.id;
+        const s = roomSummary(room);
+        const dims = roomClass(room) === 'room-void' ? null : (s.dims || s.area);
+        const base = frame.text;
+        const margin = base * 0.7;
+        const availW = spans.w - margin, availH = spans.h - margin;
 
-        // Draw window frame (two parallel lines) using visual start/end to avoid overflow
-        const frameOffset = wall.thickness_mm * 0.3;
-
-        const frame1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        frame1.setAttribute('x1', vStartX + perpX * frameOffset);
-        frame1.setAttribute('y1', vStartY + perpY * frameOffset);
-        frame1.setAttribute('x2', vEndX + perpX * frameOffset);
-        frame1.setAttribute('y2', vEndY + perpY * frameOffset);
-        frame1.setAttribute('stroke-width', '20');
-        frame1.setAttribute('stroke', '#0284c7');
-        frame1.setAttribute('class', 'window-frame');
-        group.appendChild(frame1);
-
-        const frame2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        frame2.setAttribute('x1', vStartX - perpX * frameOffset);
-        frame2.setAttribute('y1', vStartY - perpY * frameOffset);
-        frame2.setAttribute('x2', vEndX - perpX * frameOffset);
-        frame2.setAttribute('y2', vEndY - perpY * frameOffset);
-        frame2.setAttribute('stroke-width', '20');
-        frame2.setAttribute('stroke', '#0284c7');
-        frame2.setAttribute('class', 'window-frame');
-        group.appendChild(frame2);
-
-        // Draw window divider (mullion) in the middle of visual extents
-        const midX = (vStartX + vEndX) / 2;
-        const midY = (vStartY + vEndY) / 2;
-
-        const mullion = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        mullion.setAttribute('x1', midX + perpX * frameOffset);
-        mullion.setAttribute('y1', midY + perpY * frameOffset);
-        mullion.setAttribute('x2', midX - perpX * frameOffset);
-        mullion.setAttribute('y2', midY - perpY * frameOffset);
-        mullion.setAttribute('stroke-width', '15');
-        mullion.setAttribute('stroke', '#0284c7');
-        mullion.setAttribute('class', 'window-mullion');
-        group.appendChild(mullion);
-    }
-
-    function renderDefaultOpening(group, opening, startX, startY, endX, endY, wall) {
-        // Fallback for unknown opening types
-        const openingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        openingLine.setAttribute('x1', startX);
-        openingLine.setAttribute('y1', startY);
-        openingLine.setAttribute('x2', endX);
-        openingLine.setAttribute('y2', endY);
-        openingLine.setAttribute('stroke-width', Math.max(6, (wall.thickness_mm || 6)));
-        openingLine.setAttribute('stroke', '#ef4444');
-        openingLine.setAttribute('class', 'opening-marker');
-        group.appendChild(openingLine);
-    }
-
-    function getPolygonCentroid(points) {
-        let x = 0, y = 0;
-        points.forEach(p => {
-            x += p.x;
-            y += p.y;
-        });
-        return { x: x / points.length, y: y / points.length };
-    }
-
-    function calculateBounds(plan) {
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-
-        if (plan.rooms) {
-            plan.rooms.forEach(room => {
-                room.boundary_polygon.points.forEach(p => {
-                    minX = Math.min(minX, p.x);
-                    minY = Math.min(minY, p.y);
-                    maxX = Math.max(maxX, p.x);
-                    maxY = Math.max(maxY, p.y);
-                });
+        const g = el('g', { class: 'room-label-group' }, parent);
+        const build = (nameLines, scale) => {
+            g.innerHTML = '';
+            const nameSize = base * scale, dimSize = base * 0.8 * scale;
+            const lines = nameLines.map(txt => ({ txt, size: nameSize, cls: 'room-label' }));
+            if (dims) lines.push({ txt: dims, size: dimSize, cls: 'room-dims' });
+            const gap = nameSize * 0.25;
+            const total = lines.reduce((h, l) => h + l.size, 0) + gap * (lines.length - 1);
+            let y = sy - total / 2;
+            lines.forEach(l => {
+                y += l.size;
+                const text = el('text', { x: sx, y: y - l.size * 0.18, class: l.cls, 'font-size': l.size,
+                    stroke: '#fff', 'stroke-width': l.size * 0.22, 'paint-order': 'stroke', 'stroke-linejoin': 'round' }, g);
+                text.textContent = l.txt;
+                y += gap;
             });
-        }
-
-        const padding = 1000; // mm
-        viewBox = {
-            x: minX - padding,
-            y: minY - padding,
-            width: (maxX - minX) + (padding * 2),
-            height: (maxY - minY) + (padding * 2)
+            const bb = g.getBBox();
+            return { w: bb.width, h: bb.height };
         };
 
-        // Store original bounds for fit-to-content
-        originalViewBox = { ...viewBox };
+        const options = [];
+        [[name], wrapTwoLines(name)].forEach((nameLines, wrapped) => {
+            [false, true].forEach(rotated => {
+                const size = build(nameLines, 1);
+                const [aw, ah] = rotated ? [availH, availW] : [availW, availH];
+                const scale = Math.min(1, aw / size.w, ah / size.h);
+                options.push({ nameLines, rotated, scale: scale - (wrapped ? 0.02 : 0) - (rotated ? 0.05 : 0) });
+            });
+        });
+        options.sort((a, b) => b.scale - a.scale);
+        const pick = options[0];
+        build(pick.nameLines, Math.max(pick.scale, 0.4));
+        if (pick.rotated) g.setAttribute('transform', `rotate(-90 ${sx} ${sy})`);
+    }
 
+    function renderTitleBlock() {
+        const levels = sortedLevels();
+        const level = levels.find(l => l.id === currentLevel);
+        const T = frame.text;
+        const top = frame.maxY - frame.minY + T * 3;
+        const left = frame.minX;
+        const g = el('g', { class: 'title-block' }, svgElement);
+
+        let title = (level ? (level.name || level.id) : (plan.title || 'Floor')).toUpperCase();
+        if (!/\bPLAN$/.test(title)) title += ' PLAN';
+        el('text', { x: left, y: top + T * 2, class: 'title-main', 'font-size': T * 2.2 }, g).textContent = title;
+        const sub = [plan.title, level && level.elevation_mm != null ? `Level elevation ${fmtLen(level.elevation_mm)}${units === 'metric' ? ' m' : ''}` : null,
+            'Room dimensions to wall centerlines'].filter(Boolean).join('   ·   ');
+        el('text', { x: left, y: top + T * 3.6, class: 'title-sub', 'font-size': T * 0.95 }, g).textContent = sub;
+
+        // Graphic scale bar
+        // Longest "nice" length that fits in ~30% of the plan width, ticked at 0, 1/4, 1/2 and full.
+        const unitMm = units === 'metric' ? 1000 : 304.8;
+        const nice = units === 'metric' ? [1, 2, 4, 8, 10, 20, 40] : [2, 4, 8, 10, 20, 40, 80];
+        const maxLen = (frame.maxX - frame.minX) * 0.3;
+        const total = nice.filter(n => n * unitMm <= maxLen).pop() || nice[0];
+        const ticks = [0, total / 4, total / 2, total];
+        const steps = ticks.map(v => v * unitMm);
+        const labels = ticks.map((v, i) => i === 0 ? '0' : units === 'metric'
+            ? `${+v.toFixed(2)}${i === ticks.length - 1 ? ' m' : ''}` : `${+v.toFixed(2)}'`);
+        const barX = frame.maxX - steps[steps.length - 1] - T * 6, barY = top + T * 1.2, barH = T * 0.45;
+        const sb = el('g', { class: 'scale-bar' }, g);
+        for (let i = 0; i < steps.length - 1; i++) {
+            el('rect', { x: barX + steps[i], y: barY, width: steps[i + 1] - steps[i], height: barH,
+                fill: i % 2 ? '#fff' : '#111' }, sb);
+        }
+        steps.forEach((st, i) => {
+            el('text', { x: barX + st, y: barY + barH + T * 1.1, 'font-size': T * 0.8, 'text-anchor': 'middle' }, sb).textContent = labels[i];
+        });
+
+        // North arrow (+Y in OAS is north, which renders up)
+        const nx = frame.maxX - T * 2.2, ny = top + T * 1.4, r = T * 1.3;
+        el('circle', { cx: nx, cy: ny, r, fill: 'none', stroke: '#111', 'stroke-width': T * 0.08 }, g);
+        el('path', { d: `M ${nx} ${ny - r * 0.95} L ${nx + r * 0.45} ${ny + r * 0.6} L ${nx} ${ny + r * 0.3} L ${nx - r * 0.45} ${ny + r * 0.6} Z`, fill: '#111' }, g);
+        el('text', { x: nx, y: ny + r + T * 1.1, 'font-size': T * 0.9, 'text-anchor': 'middle', 'font-weight': 700 }, g).textContent = 'N';
+    }
+
+    // ------------------------------------------------------------------ view
+    function fitToContent() {
+        if (!frame) return;
+        const pad = frame.text * 5;
+        viewBox = {
+            x: frame.minX - pad,
+            y: -pad,
+            width: (frame.maxX - frame.minX) + pad * 2,
+            height: (frame.maxY - frame.minY) + frame.titleHeight + pad * 1.5,
+        };
+        originalViewBox = { ...viewBox };
         updateViewBox();
     }
 
@@ -465,59 +475,44 @@ document.addEventListener('DOMContentLoaded', () => {
         svgElement.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
     }
 
-    function zoom(factor) {
-        const cx = viewBox.x + viewBox.width / 2;
-        const cy = viewBox.y + viewBox.height / 2;
-
-        viewBox.width /= factor;
-        viewBox.height /= factor;
-
-        viewBox.x = cx - viewBox.width / 2;
-        viewBox.y = cy - viewBox.height / 2;
-
-        updateViewBox();
+    function toSvgPoint(clientX, clientY) {
+        const ctm = svgElement.getScreenCTM();
+        if (!ctm) return { x: viewBox.x + viewBox.width / 2, y: viewBox.y + viewBox.height / 2 };
+        const pt = svgElement.createSVGPoint();
+        pt.x = clientX; pt.y = clientY;
+        return pt.matrixTransform(ctm.inverse());
     }
 
-    function fitToContent() {
-        if (originalViewBox) {
-            viewBox = { ...originalViewBox };
-            updateViewBox();
-        }
+    function zoom(factor, center) {
+        const c = center || { x: viewBox.x + viewBox.width / 2, y: viewBox.y + viewBox.height / 2 };
+        viewBox.x = c.x - (c.x - viewBox.x) / factor;
+        viewBox.y = c.y - (c.y - viewBox.y) / factor;
+        viewBox.width /= factor;
+        viewBox.height /= factor;
+        updateViewBox();
     }
 
     function startDrag(e) {
         isDragging = true;
         startPan = { x: e.clientX, y: e.clientY };
-        svgElement.style.cursor = 'grabbing';
     }
 
     function drag(e) {
         if (!isDragging) return;
-
-        const dx = e.clientX - startPan.x;
-        const dy = e.clientY - startPan.y;
-
-        // Convert screen pixels to SVG units
-        // We need the ratio of viewBox width to screen width
-        const rect = svgElement.getBoundingClientRect();
-        const scaleX = viewBox.width / rect.width;
-        const scaleY = viewBox.height / rect.height;
-
-        viewBox.x -= dx * scaleX;
-        viewBox.y -= dy * scaleY;
-
+        const ctm = svgElement.getScreenCTM();
+        const k = ctm ? ctm.a : 1;
+        viewBox.x -= (e.clientX - startPan.x) / k;
+        viewBox.y -= (e.clientY - startPan.y) / k;
         startPan = { x: e.clientX, y: e.clientY };
         updateViewBox();
     }
 
     function endDrag() {
         isDragging = false;
-        svgElement.style.cursor = 'grab';
     }
 
     function handleWheel(e) {
         e.preventDefault();
-        const factor = e.deltaY > 0 ? 0.9 : 1.1;
-        zoom(factor);
+        zoom(e.deltaY > 0 ? 1 / 1.1 : 1.1, toSvgPoint(e.clientX, e.clientY));
     }
 });

@@ -7,15 +7,20 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="glass-panel">
+    <header class="toolbar">
         <div class="logo">
             <h1>OAS Viewer</h1>
-            <span class="version">v1.0</span>
+            <span class="version">v1.1</span>
         </div>
         <div class="controls">
+            <div id="level-selector" class="segmented hidden" role="tablist" aria-label="Floor level"></div>
+            <div id="unit-selector" class="segmented" role="tablist" aria-label="Units">
+                <button type="button" data-units="imperial" class="active">ft-in</button>
+                <button type="button" data-units="metric">m</button>
+            </div>
             <label for="file-upload" class="btn-primary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -43,9 +48,9 @@
         </div>
         <div id="svg-wrapper" class="hidden">
             <svg id="plan-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-            <div class="zoom-controls glass-panel">
+            <div class="zoom-controls">
                 <button id="zoom-in" title="Zoom In">+</button>
-                <button id="zoom-out" title="Zoom Out">-</button>
+                <button id="zoom-out" title="Zoom Out">&minus;</button>
                 <button id="fit-view" title="Fit to Screen">Fit</button>
             </div>
         </div>
