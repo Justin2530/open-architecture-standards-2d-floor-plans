@@ -1,0 +1,11 @@
+{
+  "oas_program": "1.0.0",
+  "plan_id": "simple_cabin",
+  "design_goal": "Compact one-bedroom cabin with an open living/kitchen space.",
+  "global_constraints": { "stories": 1, "min_area_m2": 30 },
+  "rooms": [
+    { "id": "living", "usage": "living", "desired_area_m2": { "min": 20 }, "must_have": ["daylight", "exterior_access"],
+      "adjacency": { "must_connect": ["bedroom"] } },
+    { "id": "bedroom", "usage": "bedroom", "desired_area_m2": { "min": 10 }, "must_have": ["daylight"] }
+  ]
+}

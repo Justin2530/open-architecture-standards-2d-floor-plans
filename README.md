@@ -15,6 +15,7 @@ This repo combines three things:
 | [`docs/`](docs/) | The OAS specification — Core, Geometry, Program, Layout, Render, Extensions. Built as a static site with MkDocs. |
 | [`.claude/skills/`](.claude/skills/) | Six progressive-disclosure Claude Code skills that help an LLM author and edit OAS JSON without ingesting the whole spec. |
 | [`svg-viewer/`](svg-viewer/) | A dependency-free, single-page SVG viewer for OAS floor-plan JSON. Open `index.html` in any browser. |
+| [`tools/oas_pipeline/`](tools/oas_pipeline/) | Reusable Python pipeline: compile a design spec to OAS-Layout JSON, validate geometry and circulation, check it against an OAS-Program brief, and render each floor. |
 
 ## Skills for Claude Code
 
@@ -40,6 +41,10 @@ Skills are auto-discovered when you open this repo in Claude Code — no install
 [`svg-viewer/`](svg-viewer/) is a zero-dependency, no-build viewer for OAS floor-plan JSON. Open [`svg-viewer/index.html`](svg-viewer/index.html) in any modern browser, click **Upload JSON**, and load a plan. See [`svg-viewer/README.md`](svg-viewer/README.md) for controls and the bundled example.
 
 The viewer is read-only by design — pair it with the skills above to author or edit plans.
+
+## Floor-plan pipeline
+
+[`tools/oas_pipeline/`](tools/oas_pipeline/) turns a compact design spec into validated OAS-Layout JSON and checks it against a requirements brief (OAS-Program). The two-story barndominium in `svg-viewer/examples/` is produced by it and kept as a regression example. See [`tools/oas_pipeline/README.md`](tools/oas_pipeline/README.md).
 
 ## Documentation
 

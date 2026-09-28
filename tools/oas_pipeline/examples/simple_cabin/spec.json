@@ -1,0 +1,25 @@
+{
+  "plan_id": "simple_cabin",
+  "title": "One-Bedroom Cabin",
+  "authoring_unit": "m",
+  "defaults": { "wall_height_mm": 2600, "thickness_mm": { "exterior": 200, "interior": 100 } },
+  "levels": [{ "id": "level_01", "name": "Ground Floor", "elevation_mm": 0, "is_building_story": true }],
+  "rooms": [
+    { "id": "living", "name": "Living / Kitchen", "usage": "living", "level": "level_01", "rect": [0, 0, 6, 4] },
+    { "id": "bedroom", "name": "Bedroom", "usage": "bedroom", "level": "level_01", "rect": [6, 0, 9.5, 4] }
+  ],
+  "walls": [
+    { "prefix": "w_south", "level": "level_01", "y": 0, "breaks": [0, 6, 9.5], "kind": "exterior" },
+    { "prefix": "w_north", "level": "level_01", "y": 4, "breaks": [0, 6, 9.5], "kind": "exterior" },
+    { "prefix": "w_west", "level": "level_01", "x": 0, "breaks": [0, 4], "kind": "exterior" },
+    { "prefix": "w_east", "level": "level_01", "x": 9.5, "breaks": [0, 4], "kind": "exterior" },
+    { "prefix": "w_mid", "level": "level_01", "x": 6, "breaks": [0, 4] }
+  ],
+  "openings": [
+    { "id": "d_front", "type": "door", "wall": "w_south_1", "offset": 1, "width_mm": 900, "operation": "swing", "swing_into": "living", "hinge": "left", "label": "Entry Door" },
+    { "id": "d_bedroom", "type": "door", "wall": "w_mid_1", "offset": 0.5, "width_mm": 800, "operation": "swing", "swing_into": "bedroom", "hinge": "left", "label": "Door" },
+    { "id": "win_living", "type": "window", "wall": "w_north_1", "offset": 2, "width_mm": 1500, "operation": "fixed", "label": "Window" },
+    { "id": "win_bedroom", "type": "window", "wall": "w_south_2", "offset": 1, "width_mm": 1200, "operation": "sliding", "label": "Egress Window" }
+  ],
+  "metadata": { "generated_by": "oas_pipeline", "notes": "Minimal metric example of the design-spec format." }
+}
