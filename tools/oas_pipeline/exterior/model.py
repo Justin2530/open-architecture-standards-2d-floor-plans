@@ -148,6 +148,7 @@ class ExteriorModelBuilder:
         elif self.d["default_roof"]["enabled"]:
             self.default_roofs()
         self.roof_support_and_overlaps()
+        self.roof_clearances()
         self.railings()
         self.exterior_stairs()
         self.supports()
@@ -562,28 +563,63 @@ class ExteriorModelBuilder:
                     msg = (f"{roof['id']}: edge {k} {where}: "
                            + (f"roof underside up to {worst / 1000:.2f} m above the top of the exterior wall below"
                               if tops else "no exterior wall and no porch/deck below the roof edge"))
-                    self.issues.append({"severity": "warning", "code": "roof_edge_unsupported", "refs": [roof["id"]],
+                    self.issues.append({"severity": "error", "code": "roof_edge_unsupported", "refs": [roof["id"]],
                                         "message": msg + " — the plan does not define what encloses or supports this.",
                                         "edge": k, "range_mm": [r1(s0), r1(s1)]})
-                    if self.d["infer_roof_bearing_walls"] and tops:
-                        f = WallFrame({"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}})
-                        zt = min(tops)
-                        zn = max(zn for _, _, zn in run)
-                        self.add("knee_wall", "inferred", self.wall_rect(f, s0, s1, zt, zn, 152),
-                                 refs=[roof["id"]], rule="roof_bearing_wall_extension", level=roof["level"],
-                                 material=self.d["materials"]["wall"],
-                                 assumptions=["encloses the space between the wall below and the roof edge"])
         for i, ra in enumerate(roofs):
             for rb in roofs[i + 1:]:
                 ov = self.roof_outline(ra).intersection(self.roof_outline(rb))
-                if ov.area > 1e4:
-                    c = ov.representative_point()
-                    dz = abs(self.roof_height(ra, c.x, c.y) - self.roof_height(rb, c.x, c.y))
-                    if dz > 4 * self.d["roof_thickness_mm"]:
-                        continue  # one roof simply passes well above the other's overhang
-                    self.issues.append({"severity": "warning", "code": "roofs_overlap", "refs": [ra["id"], rb["id"]],
-                                        "message": f"{ra['id']} and {rb['id']} (with overhangs) overlap over {ov.area / 1e6:.2f} m2; "
-                                                   f"surfaces are {dz:.0f} mm apart there — the plan does not define how these roofs meet."})
+                if ov.area <= 1e4:
+                    continue
+                # Overlapping in plan is fine when one roof passes under the other (a porch roof tucked under
+                # an eave). It is a conflict when the lower roof's top rises into the upper roof's build-up.
+                t = self.d["roof_thickness_mm"]
+                samples = list(ov.exterior.coords)[:-1] + [ov.representative_point().coords[0]]
+                worst = min(max(self.roof_height(ra, x, y), self.roof_height(rb, x, y)) - t
+                            - min(self.roof_height(ra, x, y), self.roof_height(rb, x, y)) for x, y in samples)
+                if worst < 0:
+                    self.issues.append({"severity": "error", "code": "roofs_conflict", "refs": [ra["id"], rb["id"]],
+                                        "message": f"{ra['id']} and {rb['id']} overlap over {ov.area / 1e6:.2f} m2 and intersect there "
+                                                   f"(lower roof rises {-worst:.0f} mm into the upper one)."})
+
+    def roof_clearances(self):
+        """Roofs must not pass through windows/doors, and covered outdoor floors need headroom."""
+        roofs = getattr(self, "_roofs", [])
+        t = self.d["roof_thickness_mm"]
+        for e in [e for e in self.elements if e["kind"] == "opening"]:
+            g = e["geom"]
+            o, u, n = g["origin"], g["u"], g["n"]
+            sill, head = o[2], o[2] + g["height"]
+            for rf in roofs:
+                out = self.roof_outline(rf)
+                for f in (0.1, 0.5, 0.9):
+                    x = o[0] + u[0] * g["width"] * f + n[0] * (g["depth"] / 2 + 60)
+                    y = o[1] + u[1] * g["width"] * f + n[1] * (g["depth"] / 2 + 60)
+                    if not out.contains(Point(x, y)):
+                        continue
+                    top = self.roof_height(rf, x, y)
+                    if top > sill + 1 and top - t < head - 1:
+                        self.issues.append({"severity": "error", "code": "opening_obstructed_by_roof",
+                                            "refs": [e["refs"][0], rf["id"]],
+                                            "message": f"{rf['id']} passes across {e['refs'][0]} (roof z{top:.0f} between sill z{sill:.0f} and head z{head:.0f})"})
+                        break
+        need = self.d["min_covered_headroom_mm"]
+        for e in [e for e in self.elements if e["kind"] == "deck"]:
+            pts = [(p[0], p[1]) for p in e["geom"]["points"]]
+            top = e["geom"]["points"][0][2]
+            foot = Polygon(pts)
+            for rf in roofs:
+                if not rf["poly"].buffer(max(rf["over"] or [0]) + 1).contains(foot.representative_point()):
+                    continue
+                low = min(self.roof_height(rf, x, y) for x, y in pts) - t
+                if low <= top:
+                    continue  # this roof is below the deck (not covering it)
+                # only the lowest covering roof above this deck matters
+                if low - top < need and not any(
+                        top < self.roof_height(r2, *foot.representative_point().coords[0]) - t < low
+                        for r2 in roofs if r2 is not rf):
+                    self.issues.append({"severity": "error", "code": "insufficient_headroom", "refs": [e["refs"][0], rf["id"]],
+                                        "message": f"{rf['id']} leaves {low - top:.0f} mm headroom over {e['refs'][0]} (need {need} mm)"})
 
     @staticmethod
     def roof_outline(roof):

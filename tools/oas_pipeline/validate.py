@@ -339,6 +339,11 @@ def validate(doc: dict, rules: Rules | None = None) -> Report:
             if not ok:
                 err(f"{r['id']}: no exterior window of at least {rules.min_egress_window_width_mm:.0f} mm")
 
+    # ---- massing / roofs: roofs must bear on walls, not pass through windows, leave headroom, not intersect
+    from .exterior.model import build_exterior_model  # local import: exterior imports this module
+    for i in build_exterior_model(doc)["issues"]:
+        {"error": err, "warning": warn}.get(i["severity"], rep.info.append)(f"[massing] {i['message']}")
+
     # ---- support by the level below
     ordered = sorted(levels.values(), key=lambda lv: lv.get("elevation_mm", 0))
     for below, above in zip(ordered, ordered[1:]):

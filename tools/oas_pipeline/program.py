@@ -27,7 +27,7 @@ from shapely.ops import unary_union
 from .validate import PlanModel, Report, Rules
 
 EXTERIOR_USAGES = {"porch", "balcony", "deck", "patio", "terrace", "exterior"}
-DEFAULT_UNCONDITIONED = sorted(EXTERIOR_USAGES | {"garage", "void", "open_to_below"})
+DEFAULT_UNCONDITIONED = sorted(EXTERIOR_USAGES | {"garage", "void", "open_to_below", "attic"})
 TOUCH_MIN_MM = 600
 TOL_M = 0.02
 
@@ -140,14 +140,14 @@ def check_program(doc: dict, program: dict, rules: Rules | None = None) -> Repor
         n = sum(1 for lv in doc.get("levels", []) if lv.get("is_building_story", True))
         if n != g["stories"]:
             err(f"{n} building stories, required {g['stories']}")
-    fp = g.get("building_footprint")
-    if fp:
+    fps = g.get("building_footprint") or []
+    for fp in ([fps] if isinstance(fps, dict) else fps):
         ids = [r["id"] for r in rooms if r.get("level") == fp["level"] and r.get("usage") not in set(fp.get("exclude_usages", []))]
         u = unary_union([m.shape[i] for i in ids])
         minx, miny, maxx, maxy = u.bounds
         got = sorted([(maxx - minx) / 1000, (maxy - miny) / 1000])
         want = sorted(fp["dims_m"])
-        info(f"building footprint {got[0]:.2f} x {got[1]:.2f} m")
+        info(f"building footprint {fp['level']}: {got[0]:.2f} x {got[1]:.2f} m")
         if abs(u.area - (maxx - minx) * (maxy - miny)) > 1:
             err("building footprint is not a full rectangle")
         if any(abs(a - b) > TOL_M for a, b in zip(got, want)):
@@ -158,15 +158,21 @@ def check_program(doc: dict, program: dict, rules: Rules | None = None) -> Repor
     blocked = tuple(circ.get("no_pass_through_usages", []))
     if blocked:
         reach = m.reachable(blocked_usages=blocked)
-        # Spaces that legitimately open only off a bedroom (its closet, an en-suite bath).
-        behind = set(circ.get("allow_behind_usages", ["closet", "bathroom"]))
+        # Spaces that legitimately open only off a bedroom (its closet, an en-suite bath, attic storage
+        # through that closet). Follow chains: bedroom -> closet -> attic.
+        behind = set(circ.get("allow_behind_usages", ["closet", "bathroom", "attic"]))
+        ok = set(reach)
+        changed = True
+        while changed:
+            changed = False
+            for r in m.rooms:
+                if r in ok or r in m.voids or m.rooms[r].get("usage") not in behind:
+                    continue
+                if any(n in ok for n, _ in m.graph[r]):
+                    ok.add(r)
+                    changed = True
         for r in m.rooms:
-            if r in reach or r in m.voids:
-                continue
-            owners = [n for n, _ in m.graph[r] if m.rooms.get(n, {}).get("usage") in blocked and n in reach]
-            if m.rooms[r].get("usage") in behind and owners:
-                continue
-            if r not in m.voids and r not in reach:
+            if r not in ok and r not in m.voids:
                 err(f"{r} is only reachable by passing through a {'/'.join(blocked)}")
     return rep
 

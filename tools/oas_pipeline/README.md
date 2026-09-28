@@ -87,6 +87,27 @@ on `spec.json` until `build` reports no errors.
 }
 ```
 
+**Massing** (recommended; replaces hand-authored roofs). Volumes describe the building, and the
+typology rules in `brain/typologies.json` decide:
+- roofs;
+- envelope walls on every level a volume spans;
+- what fills unassigned space in a story (`attic` or `open_to_below`). This becomes a real room,
+  so it appears on the floor plan too.
+
+```jsonc
+"massing": {
+  "typology": "barndominium",            // barndominium | ranch | two_story_traditional
+  "volumes": [
+    { "id": "main", "role": "shell", "rect": [20, 0, 80, 40], "levels": ["level_01", "level_02"] },
+    { "id": "garage", "role": "garage", "rect": [0, 0, 20, 40], "levels": ["level_01"], "attach_to": "main" },
+    { "id": "balcony_cover", "role": "cover", "rect": [20, -12, 60, 0], "attach_to": "main",
+      "covers": ["l1_porch", "l2_balcony"] }             // optional "roof": {...} overrides the typology rule
+  ]
+}
+```
+Roofs are emitted with `derived_from: "massing:<id>"`. The OAS height convention is:
+`level + level_offset_mm` is the height of the sloped (eave) edges on the boundary line.
+
 What the generator derives:
 
 - **Units:** integer millimetres everywhere; `area_m2` computed from each polygon.
@@ -173,10 +194,14 @@ balusters) strictly inside each opening/railing envelope, and the audit enforces
 - provenance labelling, and that inferred supports stay clear of plan walls;
 - the renderer audit.
 
-Plan problems found while building the model (for example a roof edge with nothing under it, or
-overlapping roofs) are reported as `[plan issue]` warnings. They are never repaired silently. To
-opt in to inferred knee walls under unsupported roof edges, set `"infer_roof_bearing_walls": true`;
-they are flagged as inferred and as extending the story.
+Plan problems found while building the model are reported as `[plan issue]` errors (and by the
+plan validator), never repaired in 3D:
+- a roof edge with no wall under it;
+- roofs that intersect;
+- a roof passing across a window;
+- too little headroom under a porch or balcony roof.
+
+The fix belongs in the house model's **massing** (see below).
 
 **Exterior design spec** (`exterior/design_defaults.json`, overridden per house, e.g.
 `examples/barndominium_40x60/exterior.json`) holds materials and the parameters for inferred detail.

@@ -28,7 +28,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
-from shapely.geometry import LineString, Point, Polygon, box as sbox
+from shapely.geometry import LineString, MultiPoint, Point, Polygon, box as sbox
 from shapely.ops import unary_union
 
 from ..validate import Report
@@ -351,8 +351,48 @@ def check_consistency(doc: dict, model: dict, audit: dict | None = None) -> tupl
               f"{len(drawn)} drawn, worst deviation {worst:.1f} mm ({worst_id})", not missing and not extra,
               note=f"missing {missing[:5]} extra {extra[:5]}" if missing or extra else "")
 
+    # ---------------------------------------------------------------- massing (house-model volumes)
+    mass = doc.get("massing", {}).get("volumes", [])
+    for v in mass:
+        fp = Polygon([(p["x"], p["y"]) for p in v["footprint"]["points"]])
+        minx, miny, maxx, maxy = fp.bounds
+        dims = f"{(maxx - minx) / 304.8:.2f}' x {(maxy - miny) / 304.8:.2f}'"
+        if v["role"] in ("shell", "wing", "garage"):
+            for lid in v["levels"]:
+                cov_parts = []
+                for e in by_kind["wall_panel"] + by_kind["opening"]:
+                    if e.get("level") != lid or e["class"] != "plan":
+                        continue
+                    cov_parts.append(MultiPoint([(p[0], p[1]) for p in bbox_points(e)]).convex_hull.buffer(1))
+                # edges shared with another enclosed volume on this level are party walls (interior), not envelope
+                party = [Polygon([(p["x"], p["y"]) for p in o["footprint"]["points"]]).buffer(1)
+                         for o in mass if o is not v and o["role"] in ("shell", "wing", "garage") and lid in o["levels"]]
+                envelope = fp.boundary.difference(unary_union(party)) if party else fp.boundary
+                cov = envelope.intersection(unary_union(cov_parts)).length / envelope.length if cov_parts else 0
+                c.row("massing", f"{v['id']} on {lid}", f"{v['role']} {dims} enclosed",
+                      f"perimeter walled {cov:.1%}", cov > 0.995)
+            if "plate_z_mm" in v:
+                top_lid = v["levels"][-1]
+                tops = [bbox(e)[1][2] for e in by_kind["wall_panel"] if e.get("level") == top_lid and e["class"] == "plan"
+                        and any(fp.exterior.distance(Point(p[0], p[1])) < 200 for p in bbox_points(e))]
+                c.row("massing", f"{v['id']} plate", f"z{v['plate_z_mm']}", f"wall tops up to z{max(tops):.0f}" if tops else "none",
+                      bool(tops) and abs(max(tops) - v["plate_z_mm"]) <= TOL)
+        r = v.get("roof", {})
+        planes = [e for e in by_kind["roof_plane"] if r.get("id") in e["refs"]]
+        ok = bool(planes) and all(e.get("roof_type") == r.get("form") for e in planes)
+        note = ""
+        if ok and r.get("form") == "gable":
+            top = max(p[2] for e in planes for p in e["geom"]["points"])
+            ridge = [p for e in planes for p in e["geom"]["points"] if abs(p[2] - top) < 1]
+            xs, ys = [p[0] for p in ridge], [p[1] for p in ridge]
+            axis = "x" if (max(xs) - min(xs)) >= (max(ys) - min(ys)) else "y"
+            ok = axis == r.get("ridge_axis")
+            note = f"ridge along {axis}"
+        c.row("massing", f"{v['id']} roof", f"{r.get('form')} {r.get('pitch', '')} {('ridge ' + r['ridge_axis']) if r.get('ridge_axis') else ''}".strip(),
+              f"{len(planes)} plane(s) {planes[0].get('roof_type') if planes else ''} {note}".strip(), ok)
+
     for i in model.get("issues", []):
-        (c.rep.warnings if i["severity"] == "warning" else c.rep.info).append(f"[plan issue] {i['message']}")
+        {"error": c.rep.errors, "warning": c.rep.warnings}.get(i["severity"], c.rep.info).append(f"[plan issue] {i['message']}")
     return c.rep, c.table
 
 

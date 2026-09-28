@@ -19,7 +19,7 @@ Everything below lives in [`tools/oas_pipeline/`](../tools/oas_pipeline/) unless
 | `exterior/viewer/` + `render.mjs` | three.js renderer: 4 orthographic elevations, perspective, aerial and provenance views. It draws only the model. | **Yes.** | Massing-quality rendering, not photoreal. Software-rendered here, which is slow. |
 | `svg-viewer/` | Engineering floor-plan viewer: conventional black-and-white, floor selector, dimensions. | Engineering tool only (per brief). | Not the consumer renderer. It has no overall dimension strings and no area schedule yet. |
 | `examples/barndominium_40x60/` | TEST CASE #1: spec, program (the brief as requirements) and exterior design. | Regression fixture. | `spec.json` is a hand-designed layout, the output of the LLM design step. |
-| Scratch scripts from the first session (`gen.py`, `validate.py`, `scene.js`) | Superseded by the modules above. Their data became `spec.json`, and the regression test proves the output is byte-identical. | Retired. | `scene.js` hard-coded the barndominium and re-interpreted the design (see §8). |
+| Scratch scripts from the first session (`gen.py`, `validate.py`, `scene.js`) | Superseded by the modules above. Their data became `spec.json`, and the regression test proves the output is byte-identical. | Retired. | `scene.js` hard-coded the barndominium and re-interpreted the design (see §9). |
 
 **Takeaway:** the deterministic back half of the pipeline is reusable and fast, about **0.6 s** in total:
 
@@ -182,6 +182,7 @@ Found while building the exterior model. Each item is currently either inferred 
 
 | Gap | Why it matters | Today |
 |---|---|---|
+| **Massing.** No building volumes, no "what fills this story", no roof-bears-on-wall. *Now provided by our massing layer (§8).* | Otherwise floors and roofs can disagree while every per-floor check passes. | `massing` in the house model → OAS rooms/walls/roofs + `oas-massing` block. |
 | **Roof semantics.** Per-edge slopes only; no ridge/hip/valley topology for non-rectangular roofs; `level_offset_mm` is ambiguous for shed roofs (eave or high edge?); no roof-to-wall or roof-to-roof junctions; no "this roof covers that porch". | Roofs are the dominant exterior mass. | Rectangular gable/shed/hip reconstructed; conflicts reported (barndominium: 3 unsupported edges and 1 overlap). |
 | **What is above a space.** No ceiling type (flat, vaulted, open to roof), no attic/unconditioned volume, no knee walls. | Decides whether a one-story wing under a two-story roof is enclosed. That is the barndominium's open question. | Reported as `roof_edge_unsupported`. Optional inferred knee walls, flagged. |
 | **Vertical build-up.** Floor structure depth, plate height vs floor-to-floor, and continuous multi-story exterior walls are not modelled. | Elevation band lines, eave heights, window head alignment. | Derived "floor-structure band". |
@@ -217,7 +218,66 @@ Where OAS has a natural place (Site, Materials), we write it there as extensions
 
 ---
 
-## 8. Lesson from the 3D mismatch (why the rules in CLAUDE.md exist)
+## 8. Massing layer: the house model must describe the *building*, not only the floors
+
+**Incident 2 (after the renderer fix).** The 3D model matched the plan exactly, yet it did not look
+like the barndominium the homeowner described. Trace:
+
+| Layer | What happened |
+|---|---|
+| Intent | "40x60 **two-story** barndominium" means one 40×60 shell, two stories tall, under one gable. |
+| Floor plans | The finished second floor covered only 40' of it. Nothing said what fills the other 20' of that story. |
+| OAS | Floors are rooms + walls per level. Roofs are free-floating entities. There is no building shell, no "what is above this room" and no roof-bears-on-wall relation, and a shed roof's height reference is ambiguous. |
+| Our spec (house model) | Inherited the gap. Rooms, walls and roofs were authored independently: a 60' roof over a 40' second floor, and a balcony roof at a height that ran into the main eave. |
+| Exterior model / renderer | Faithfully drew two contradictory facts: a floating roof and an open gable. |
+| Consistency check | Passed, because it compared 3D against 2D and both came from the same contradictory data. |
+
+**Fix: a massing layer in the house model** (`tools/oas_pipeline/massing.py`,
+`tools/oas_pipeline/brain/typologies.json`):
+
+- **The spec states volumes, not roofs.** Each volume has a footprint, the levels it spans, a role
+  (`shell`, `wing`, `garage` or `cover`), what it attaches to, and which rooms a cover covers. It also
+  names a typology. For the barndominium that is three small objects: shell 60×40 over both levels,
+  a garage attached to it, and a balcony cover over `l1_porch` and `l2_balcony`.
+- **Everything else is compiled deterministically from the typology rules:**
+  - envelope walls wherever a volume's level has no wall;
+  - the unassigned space inside a volume, which becomes a real room (`attic` for a barndominium,
+    `open_to_below` for a two-story traditional) and so appears on the 2D plan too;
+  - roofs, with one explicit height convention: OAS `level + level_offset` is the height of the
+    sloped eave edges on the boundary line.
+- **A cover roof hung "below the eave"** gets the steepest pitch that still leaves the required
+  headroom over the covered floor: 1/4:12 here, giving 2192 mm. If none works, the generator stops
+  with a clear design error.
+- **New plan-level invariants**, checked by the validator before any 3D exists:
+  - every roof edge bears on a wall or sits over an outdoor space;
+  - roofs do not intersect;
+  - no roof passes across a window or door;
+  - covered outdoor floors have at least 2134 mm (7'-0") headroom.
+- **The consistency check gains a `massing` section:**
+  - each volume is fully enclosed on every level it spans (party walls with attached volumes excluded);
+  - wall tops reach the volume's plate height;
+  - the roof has the right form and ridge axis.
+
+Result for the barndominium:
+- The level-2 plan shows the full 60×40 shell. The east 20' is "Attic (unfinished)", reached by an
+  access door from the Bedroom 3 closet.
+- The exterior is one continuous two-story barn shell with closed gables.
+- The garage has a 1:12 lean-to.
+- The balcony cover is tucked under the main eave.
+- The new obstruction check caught a real latent conflict: two loft windows were taller than the
+  cover-roof ledger allows. They were shortened to 4'-0".
+
+The typology rule resolves the ambiguity, not the homeowner. The barndominium typology is a
+full-height shell with an attic for unassigned space. A two-story traditional is a set of stacked
+volumes where lower-only areas become wings with their own roofs.
+
+**Why OAS alone could not do this, and what the house model now carries:** building volumes and
+their roles, volume-to-volume attachment, covers-to-rooms relationships, the typology, what fills
+unassigned volume space, and roofs as consequences of volumes. These are emitted into OAS as
+ordinary rooms, walls and roofs (roofs carry `derived_from: massing:<id>`) plus an `oas-massing`
+extension block, so OAS consumers still get complete geometry.
+
+## 9. Lesson from the 3D mismatch (why the rules in CLAUDE.md exist)
 
 The first 3D render widened the second story to the full 60' and moved the balcony roof, because
 the scratch renderer "fixed" what looked wrong. The root cause was that the renderer made
@@ -232,10 +292,11 @@ The same principle must hold for photoreal images (§5) and for any future consu
 
 ---
 
-## 9. Milestones: prove a fast, reusable, affordable engine
+## 10. Milestones: prove a fast, reusable, affordable engine
 
 | # | Milestone | Proves |
 |---|---|---|
+| M0 ✅ | **Massing layer** (§8): volumes + typology rules → envelope walls, unassigned spaces, roofs; plan-level roof/opening/headroom invariants. | 2D and 3D compile from one building description. |
 | M1 | **House Model v0 + walls-from-rooms.** Authoring = rooms (polygons or zone slots) + openings by room pair/facade; walls and exterior openings derived. Re-express the barndominium in it; the regression test must still produce the same plan. | The authoring surface an LLM or solver needs is small. |
 | M2 | **House Brain v0 as data.** Room size/proportion tables, adjacency matrix, clearances, window rules, privacy zones, plus a **scorer** (circulation %, dead area, adjacency satisfaction, proportions, wet-wall clustering). | Rules are explicit and testable. |
 | M3 | **Typology solver v0** for rectangular 1- and 2-story shells (banded layouts), placing doors, windows and stairs by rule and emitting N candidates. | No LLM coordinates. |
@@ -251,7 +312,7 @@ tokens total, 0 validator errors, the program check passes, and a human reviewer
 
 ---
 
-## 10. TEST CASE #2 (proposed)
+## 11. TEST CASE #2 (proposed)
 
 > "We'd like a one-story ranch, about 1,800 square feet, three bedrooms and two bathrooms. Master
 > bedroom away from the kids' rooms. Open kitchen and family room with a big island. Two-car garage

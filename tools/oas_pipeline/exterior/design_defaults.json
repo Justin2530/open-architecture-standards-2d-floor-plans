@@ -11,9 +11,16 @@
   "vehicle_door_min_width_mm": 2100,
   "support_gap_tolerance_mm": 50,
   "foundation_plinth": true,
-  "infer_roof_bearing_walls": false,
-  "default_roof": { "enabled": true, "pitch_deg": 26.57, "overhang_mm": 300 },
-  "site": { "ground": true, "driveway": true, "driveway_length_mm": 7000 },
+  "default_roof": {
+    "enabled": true,
+    "pitch_deg": 26.57,
+    "overhang_mm": 300
+  },
+  "site": {
+    "ground": true,
+    "driveway": true,
+    "driveway_length_mm": 7000
+  },
   "front": null,
   "materials": {
     "wall": "light_lap_siding",
@@ -31,5 +38,6 @@
     "foundation": "concrete",
     "ground": "grass",
     "driveway": "concrete"
-  }
+  },
+  "min_covered_headroom_mm": 2134
 }

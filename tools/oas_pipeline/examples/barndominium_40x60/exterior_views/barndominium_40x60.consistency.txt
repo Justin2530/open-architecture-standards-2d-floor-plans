@@ -27,13 +27,13 @@ EXTERIOR WALLS
   ok   l2_w_north_1: plan L=4877 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
   ok   l2_w_north_2: plan L=2438 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
   ok   l2_w_north_3: plan L=4877 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
-  ok   l2_w_east_1: plan L=7925 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
-  ok   l2_w_east_2: plan L=1524 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
-  ok   l2_w_east_3: plan L=2743 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   env_main_level_02_1: plan L=6095 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   env_main_level_02_2: plan L=12192 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
+  ok   env_main_level_02_3: plan L=6095 t=152 z=3048..5791 | 3D z=3048..5791 gap=0.000m2 extra=0.000m2
 
 STORY EXTENTS
   ok   level_01 enclosed outline: plan 80.00' x 40.00' | 3D 80.00' x 40.00' (centreline), perimeter walled 100.0%
-  ok   level_02 enclosed outline: plan 40.00' x 40.00' | 3D 40.00' x 40.00' (centreline), perimeter walled 100.0%
+  ok   level_02 enclosed outline: plan 60.00' x 40.00' | 3D 60.00' x 40.00' (centreline), perimeter walled 100.0%
 
 BUILDING FOOTPRINT
   ok   ground floor incl. garage: plan 297.29 m2 (3200 sf) 80.00' x 40.00' | 3D 80.00' x 40.00' (centreline)
@@ -49,8 +49,8 @@ WINDOWS
   ok   l1_win_mudroom: plan at 1219 w914 h1219 sill z1067 | 3D at 1219 w914 h1219 sill z1067 (window)
   ok   l1_win_kitchen: plan at 2134 w1829 h1219 sill z1067 | 3D at 2134 w1829 h1219 sill z1067 (window)
   ok   l1_win_mbath_n: plan at 1524 w1219 h1067 sill z1372 | 3D at 1524 w1219 h1067 sill z1372 (window)
-  ok   l2_win_loft_s: plan at 610 w914 h1524 sill z3962 | 3D at 610 w914 h1524 sill z3962 (window)
-  ok   l2_win_loft_s2: plan at 4420 w762 h1524 sill z3962 | 3D at 4420 w762 h1524 sill z3962 (window)
+  ok   l2_win_loft_s: plan at 610 w914 h1219 sill z3962 | 3D at 610 w914 h1219 sill z3962 (window)
+  ok   l2_win_loft_s2: plan at 4420 w762 h1219 sill z3962 | 3D at 4420 w762 h1219 sill z3962 (window)
   ok   l2_win_great_1: plan at 914 w1829 h1219 sill z3658 | 3D at 914 w1829 h1219 sill z3658 (window)
   ok   l2_win_great_2: plan at 3962 w1829 h1219 sill z3658 | 3D at 3962 w1829 h1219 sill z3658 (window)
   ok   l2_win_loft_w: plan at 762 w1219 h1219 sill z3962 | 3D at 762 w1219 h1219 sill z3962 (window)
@@ -88,8 +88,8 @@ STAIRS
 
 ROOFS
   ok   roof_main: plan base z5791, 4 edges | 3D 2 plane(s) [gable]
-  ok   roof_balcony: plan base z5791, 4 edges | 3D 1 plane(s) [shed]
   ok   roof_garage: plan base z2743, 4 edges | 3D 1 plane(s) [shed]
+  ok   roof_balcony_cover: plan base z5365, 4 edges | 3D 1 plane(s) [shed]
 
 INFERRED SUPPORTS
   ok   post:1: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
@@ -99,15 +99,20 @@ INFERRED SUPPORTS
   ok   post:5: plan within porch/deck footprint, clear of walls | 3D inside=True wall overlap=0.0000 m2
 
 PROVENANCE
-  ok   element classes: plan plan / derived / inferred | 3D {'plan': 128, 'derived': 15, 'inferred': 11}
+  ok   element classes: plan plan / derived / inferred | 3D {'plan': 128, 'derived': 22, 'inferred': 11}
 
 RENDERER AUDIT
-  ok   all elements: plan 154 model elements | 3D 154 drawn, worst deviation 50.0 mm (opening:8)
+  ok   all elements: plan 161 model elements | 3D 161 drawn, worst deviation 50.0 mm (opening:8)
 
-WARNINGS: 
-  [plan issue] roof_main: edge 0 (6096,3658)->(24384,3658) mm, 12500-18250 mm along it: roof underside up to 2.90 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
-  [plan issue] roof_main: edge 1 (24384,3658)->(24384,15850) mm, 0-12000 mm along it: roof underside up to 3.05 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
-  [plan issue] roof_main: edge 2 (24384,15850)->(6096,15850) mm, 0-6000 mm along it: roof underside up to 2.90 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
-  [plan issue] roof_balcony: edge 2 (18288,3658)->(6096,3658) mm, 0-12000 mm along it: roof underside up to 0.15 m above the top of the exterior wall below — the plan does not define what encloses or supports this.
-  [plan issue] roof_main and roof_balcony (with overhangs) overlap over 3.81 m2; surfaces are 343 mm apart there — the plan does not define how these roofs meet.
+MASSING
+  ok   main on level_01: plan shell 60.00' x 40.00' enclosed | 3D perimeter walled 100.0%
+  ok   main on level_02: plan shell 60.00' x 40.00' enclosed | 3D perimeter walled 100.0%
+  ok   main plate: plan z5791 | 3D wall tops up to z5791
+  ok   main roof: plan gable  ridge x | 3D 2 plane(s) gable ridge along x
+  ok   garage on level_01: plan garage 20.00' x 40.00' enclosed | 3D perimeter walled 100.0%
+  ok   garage plate: plan z2743 | 3D wall tops up to z2743
+  ok   garage roof: plan shed 1:12 | 3D 1 plane(s) shed
+  ok   balcony_cover roof: plan shed 1/4:12 | 3D 1 plane(s) shed
+
+WARNINGS: none
 ERRORS: none

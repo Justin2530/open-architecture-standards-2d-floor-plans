@@ -2140,9 +2140,149 @@
         0,
         305,
         305
-      ]
+      ],
+      "derived_from": "massing:garage"
     }
   ],
+  "extensions": {
+    "oas-massing": {
+      "version": "0.1.0"
+    }
+  },
+  "massing": {
+    "typology": "barndominium",
+    "volumes": [
+      {
+        "id": "main",
+        "role": "shell",
+        "levels": [
+          "level_01",
+          "level_02"
+        ],
+        "attach_to": null,
+        "covers": [],
+        "footprint": {
+          "unit": "mm",
+          "closed": true,
+          "points": [
+            {
+              "x": 6096,
+              "y": 3658
+            },
+            {
+              "x": 24384,
+              "y": 3658
+            },
+            {
+              "x": 24384,
+              "y": 15850
+            },
+            {
+              "x": 6096,
+              "y": 15850
+            }
+          ]
+        },
+        "plate_z_mm": 5791,
+        "roof": {
+          "id": "roof_main",
+          "form": "gable",
+          "ridge_axis": "x",
+          "pitch_deg": 18.43,
+          "base_z": 5791,
+          "level": "level_02"
+        }
+      },
+      {
+        "id": "garage",
+        "role": "garage",
+        "levels": [
+          "level_01"
+        ],
+        "attach_to": "main",
+        "covers": [],
+        "footprint": {
+          "unit": "mm",
+          "closed": true,
+          "points": [
+            {
+              "x": 0,
+              "y": 3658
+            },
+            {
+              "x": 6096,
+              "y": 3658
+            },
+            {
+              "x": 6096,
+              "y": 15850
+            },
+            {
+              "x": 0,
+              "y": 15850
+            }
+          ]
+        },
+        "plate_z_mm": 2743,
+        "roof": {
+          "id": "roof_garage",
+          "form": "shed",
+          "pitch": "1:12",
+          "pitch_deg": 4.76,
+          "attached_edge": 1,
+          "low_edge": 3,
+          "high_z": 3251,
+          "base_z": 2743,
+          "level": "level_01"
+        }
+      },
+      {
+        "id": "balcony_cover",
+        "role": "cover",
+        "levels": [],
+        "attach_to": "main",
+        "covers": [
+          "l1_porch",
+          "l2_balcony"
+        ],
+        "footprint": {
+          "unit": "mm",
+          "closed": true,
+          "points": [
+            {
+              "x": 6096,
+              "y": 0
+            },
+            {
+              "x": 18288,
+              "y": 0
+            },
+            {
+              "x": 18288,
+              "y": 3658
+            },
+            {
+              "x": 6096,
+              "y": 3658
+            }
+          ]
+        },
+        "roof": {
+          "id": "roof_balcony_cover",
+          "form": "shed",
+          "attach_height_z": 5441,
+          "headroom_mm": 2192,
+          "pitch": "1/4:12",
+          "pitch_deg": 1.19,
+          "attached_edge": 2,
+          "low_edge": 0,
+          "high_z": 5441,
+          "base_z": 5365,
+          "level": "level_02"
+        }
+      }
+    ]
+  },
   "connections": [
     {
       "from": "exterior",
@@ -2253,6 +2393,6 @@
   "metadata": {
     "generated_by": "Claude Code (OAS skills: oas-layout, oas-geometry, oas-core)",
     "timestamp": "2026-09-28T00:00:00Z",
-    "notes": "First Floor extract of barndominium_40x60_2story. 40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Upper floor covers the west 40' of the house; the master suite below the east 20' has attic/mechanical space above."
+    "notes": "First Floor extract of barndominium_40x60_2story. 40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Massing: one 40'x60' two-story shell (barndominium typology) under a single 4:12 gable; the second floor is finished over the west 40' and the east 20' of that story is unfinished attic (reached from the Bedroom 3 closet). Garage: attached one-story volume with a 1:12 lean-to roof. Balcony and porch share a cover roof hung below the main eave, pitched for 7'-0\" headroom. Roofs and envelope walls are compiled from the massing volumes."
   }
 }

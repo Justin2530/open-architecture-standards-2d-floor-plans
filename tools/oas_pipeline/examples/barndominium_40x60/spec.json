@@ -1191,10 +1191,11 @@
       "wall": "l2_w_south_1",
       "offset": 2.0,
       "width_mm": 914,
-      "height_mm": 1524,
+      "height_mm": 1219,
       "sill_mm": 914,
       "operation": "fixed",
-      "label": "Window 3'-0\""
+      "label": "Window 3'-0\"",
+      "_comment": "head kept below the balcony-cover roof ledger (massing check: opening_obstructed_by_roof)"
     },
     {
       "id": "l2_win_loft_s2",
@@ -1202,10 +1203,11 @@
       "wall": "l2_w_south_1",
       "offset": 14.5,
       "width_mm": 762,
-      "height_mm": 1524,
+      "height_mm": 1219,
       "sill_mm": 914,
       "operation": "fixed",
-      "label": "Window 2'-6\""
+      "label": "Window 2'-6\"",
+      "_comment": "head kept below the balcony-cover roof ledger (massing check: opening_obstructed_by_roof)"
     },
     {
       "id": "l2_win_loft_w",
@@ -1339,6 +1341,18 @@
       "height_mm": 2134,
       "operation": "sliding",
       "label": "Bypass Closet Door 2'-6\""
+    },
+    {
+      "id": "l2_d_attic",
+      "type": "door",
+      "wall": "l2_w_east_2",
+      "offset": 0.5,
+      "width_mm": 610,
+      "height_mm": 1219,
+      "operation": "swing",
+      "swing_into": "main_attic_level_02",
+      "hinge": "left",
+      "label": "Attic Access Door 2'-0\" x 4'-0\""
     }
   ],
   "railings": [
@@ -1526,95 +1540,6 @@
       ]
     }
   ],
-  "roofs": [
-    {
-      "id": "roof_main",
-      "level": "level_02",
-      "level_offset_mm": 2743,
-      "rect": [
-        20,
-        0,
-        80,
-        40
-      ],
-      "slope_angles": [
-        18.43,
-        0.0,
-        18.43,
-        0.0
-      ],
-      "defines_slope": [
-        true,
-        false,
-        true,
-        false
-      ],
-      "eave_overhang_mm": [
-        305,
-        305,
-        305,
-        0
-      ]
-    },
-    {
-      "id": "roof_balcony",
-      "level": "level_02",
-      "level_offset_mm": 2743,
-      "rect": [
-        20,
-        -12,
-        60,
-        0
-      ],
-      "slope_angles": [
-        4.76,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "defines_slope": [
-        true,
-        false,
-        false,
-        false
-      ],
-      "eave_overhang_mm": [
-        305,
-        305,
-        0,
-        305
-      ]
-    },
-    {
-      "id": "roof_garage",
-      "level": "level_01",
-      "level_offset_mm": 2743,
-      "rect": [
-        0,
-        0,
-        20,
-        40
-      ],
-      "slope_angles": [
-        0.0,
-        0.0,
-        0.0,
-        4.76
-      ],
-      "defines_slope": [
-        false,
-        false,
-        false,
-        true
-      ],
-      "eave_overhang_mm": [
-        305,
-        0,
-        305,
-        305
-      ]
-    }
-  ],
   "extra_connections": [
     {
       "from": "l1_foyer",
@@ -1629,6 +1554,55 @@
   "metadata": {
     "generated_by": "Claude Code (OAS skills: oas-layout, oas-geometry, oas-core)",
     "timestamp": "2026-09-28T00:00:00Z",
-    "notes": "40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Upper floor covers the west 40' of the house; the master suite below the east 20' has attic/mechanical space above."
+    "notes": "40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Massing: one 40'x60' two-story shell (barndominium typology) under a single 4:12 gable; the second floor is finished over the west 40' and the east 20' of that story is unfinished attic (reached from the Bedroom 3 closet). Garage: attached one-story volume with a 1:12 lean-to roof. Balcony and porch share a cover roof hung below the main eave, pitched for 7'-0\" headroom. Roofs and envelope walls are compiled from the massing volumes."
+  },
+  "massing": {
+    "typology": "barndominium",
+    "_comment": "Decided from intent: '40x60 two-story barndominium' = one 40'x60' shell, two stories tall; '20x40 garage on one end' = attached one-story garage volume at the west gable; '12x40 covered second-story balcony' = a cover volume over the balcony and the porch below it. Roofs, envelope walls and the unfinished upper space are compiled from brain/typologies.json.",
+    "volumes": [
+      {
+        "id": "main",
+        "role": "shell",
+        "rect": [
+          20,
+          0,
+          80,
+          40
+        ],
+        "levels": [
+          "level_01",
+          "level_02"
+        ]
+      },
+      {
+        "id": "garage",
+        "role": "garage",
+        "rect": [
+          0,
+          0,
+          20,
+          40
+        ],
+        "levels": [
+          "level_01"
+        ],
+        "attach_to": "main"
+      },
+      {
+        "id": "balcony_cover",
+        "role": "cover",
+        "rect": [
+          20,
+          -12,
+          60,
+          0
+        ],
+        "attach_to": "main",
+        "covers": [
+          "l1_porch",
+          "l2_balcony"
+        ]
+      }
+    ]
   }
 }

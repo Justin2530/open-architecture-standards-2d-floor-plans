@@ -17,9 +17,12 @@ package (paid). Read [product/BRIEF.md](product/BRIEF.md) (governing brief) and
    and files are code. The LLM handles intent, concept decisions, judgment and edits, and emits
    small structured outputs (a program or edit ops), never coordinates in production.
 4. **Do not hard-code the benchmark house.** The 40'×60' barndominium is TEST CASE #1 only.
-   New logic must work on the cabin example too, and eventually on TEST CASE #2 (see ARCHITECTURE §10).
-5. **Concept design only.** Outputs carry "CONCEPT DESIGN — NOT FOR CONSTRUCTION".
-6. **Flag cost, latency and lock-in.** Before adding anything that creates recurring AI cost,
+   New logic must work on the cabin example too, and eventually on TEST CASE #2 (see ARCHITECTURE §11).
+5. **Describe the building, not just the floors.** Roofs, envelope walls and unassigned upper space
+   are compiled from the spec's `massing` volumes + typology rules (`tools/oas_pipeline/brain/`),
+   never authored independently of the floors (ARCHITECTURE §8).
+6. **Concept design only.** Outputs carry "CONCEPT DESIGN — NOT FOR CONSTRUCTION".
+7. **Flag cost, latency and lock-in.** Before adding anything that creates recurring AI cost,
    latency, vendor lock-in or significant complexity, say so.
 
 ## Commands

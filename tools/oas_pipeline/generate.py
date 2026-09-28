@@ -77,12 +77,20 @@ class Generator:
 
     # -------------------------------------------------------------- build
     def build(self) -> dict:
+        from .massing import MassingCompiler
         self._rooms()
+        mass = MassingCompiler(self, self.spec["massing"]) if self.spec.get("massing") else None
+        if mass:
+            mass.add_unassigned_spaces()   # before walls, so wall adjacency sees the new spaces
         self._walls()
+        if mass:
+            mass.add_envelope_walls()      # before openings, so openings may use envelope walls
         self._openings()
         self._railings()
         slabs = [self._slab(s) for s in self.spec.get("floor_slabs", [])]
         roofs = [self._roof(r) for r in self.spec.get("roofs", [])]
+        if mass:
+            roofs += mass.roofs(self._floor_tops(slabs))
         connections = self._connections()
 
         doc = {
@@ -100,6 +108,9 @@ class Generator:
             "connections": connections,
             "metadata": self.spec.get("metadata", {}),
         }
+        if mass:
+            doc["extensions"] = {"oas-massing": {"version": "0.1.0"}}
+            doc["massing"] = {"typology": self.spec["massing"]["typology"], "volumes": mass.volumes_json()}
         if self.spec.get("normalize_origin", False):
             normalize_origin(doc)
         return doc
@@ -167,18 +178,24 @@ class Generator:
 
         self.walls_json, self.wall_by_id = [], {}
         for wid, lv, f, to, kind, t, src in raw:
-            if wid in self.wall_by_id:
-                raise SpecError(f"duplicate wall id {wid!r}")
-            wall = {"id": wid, "type_name": src.get("type_name", "IfcWall"),
-                    "from": self.pt(*f), "to": self.pt(*to), "unit": "mm",
-                    "thickness_mm": t, "wall_height_mm": src.get("wall_height_mm", self.wall_height),
-                    "level": lv, "structural": src.get("structural", kind == "exterior")}
-            length = math.hypot(wall["to"]["x"] - wall["from"]["x"], wall["to"]["y"] - wall["from"]["y"])
-            if length == 0:
-                raise SpecError(f"wall {wid!r} has zero length")
-            wall["adjacent_rooms"] = list(self._side_rooms(wall, length / 2))
-            self.walls_json.append(wall)
-            self.wall_by_id[wid] = wall
+            self._add_wall(self.pt(*f), self.pt(*to), wid, lv, kind, {**src, "thickness_mm": t})
+
+    def _add_wall(self, f_mm: dict, to_mm: dict, wid: str, lv: str, kind: str, src: dict):
+        if wid in self.wall_by_id:
+            raise SpecError(f"duplicate wall id {wid!r}")
+        wall = {"id": wid, "type_name": src.get("type_name", "IfcWall"),
+                "from": f_mm, "to": to_mm, "unit": "mm",
+                "thickness_mm": src.get("thickness_mm", self.thickness[kind]),
+                "wall_height_mm": src.get("wall_height_mm", self.wall_height),
+                "level": lv, "structural": src.get("structural", kind == "exterior")}
+        if "derived_from" in src:
+            wall["derived_from"] = src["derived_from"]
+        length = math.hypot(wall["to"]["x"] - wall["from"]["x"], wall["to"]["y"] - wall["from"]["y"])
+        if length == 0:
+            raise SpecError(f"wall {wid!r} has zero length")
+        wall["adjacent_rooms"] = list(self._side_rooms(wall, length / 2))
+        self.walls_json.append(wall)
+        self.wall_by_id[wid] = wall
 
     def _openings(self):
         self.openings_json = []
@@ -230,6 +247,20 @@ class Generator:
                 "host_type": r.get("host_type", "floor"),
                 "path": {"unit": "mm", "closed": bool(r.get("closed", False)), "points": pts},
                 "base_offset_mm": r.get("base_offset_mm", 0)})
+
+    def _floor_tops(self, slabs: list) -> dict:
+        """Walking-surface height of each room: its level plus the offset of a slab with the same footprint."""
+        elev = {lv["id"]: lv.get("elevation_mm", 0) for lv in self.levels}
+        tops = {}
+        for rid in self.room_order:
+            top = elev[self.room_level[rid]]
+            for s in slabs:
+                sp = Polygon([(p["x"], p["y"]) for p in s["boundary_polygon"]["points"]])
+                if s["level"] == self.room_level[rid] and sp.symmetric_difference(self.room_shape[rid]).area < 1e4:
+                    top += s.get("height_above_level_mm", 0)
+                    break
+            tops[rid] = top
+        return tops
 
     def _slab(self, s: dict) -> dict:
         return {"id": s["id"], "type_name": s.get("type_name", "IfcSlab"), "level": self._level(s, "slab"),
@@ -326,6 +357,7 @@ def normalize_origin(doc: dict) -> None:
 
     for k in ("rooms", "walls", "railings", "floor_slabs", "roofs"):
         shift(doc.get(k, []))
+    shift(doc.get("massing", {}))
 
 
 def level_extracts(doc: dict) -> list[tuple[str, dict]]:
@@ -342,6 +374,7 @@ def level_extracts(doc: dict) -> list[tuple[str, dict]]:
             "levels": [lv],
             "rooms": pick("rooms"), "walls": pick("walls"), "openings": pick("openings"),
             "railings": pick("railings"), "floor_slabs": pick("floor_slabs"), "roofs": pick("roofs"),
+            **({"extensions": doc["extensions"], "massing": doc["massing"]} if "massing" in doc else {}),
             "connections": [c for c in doc.get("connections", [])
                             if all(n == "exterior" or n in room_ids for n in (c["from"], c["to"]))],
             "metadata": {**doc.get("metadata", {}), "notes": f"{lname} extract of {doc['plan_id']}. " + notes},

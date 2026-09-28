@@ -49,30 +49,51 @@ class BarndominiumExterior(unittest.TestCase):
             self.assertEqual([round(v / FT, 2) for v in (lo[0], lo[1], hi[0], hi[1])], [20.0, 0.0, 60.0, 12.0])
             self.assertEqual(deck[0]["geom"]["points"][0][2], z)
 
-    def test_second_story_is_not_widened(self):
-        # The plan's second floor spans x = 20'..60'. No wall-like element may extend it (the old scratch
-        # renderer added "attic" walls to x = 80', making the balcony look like 2/3 of the facade).
-        for e in self.model["elements"]:
-            if e["kind"] in ("wall_panel", "knee_wall", "band") and e.get("level") == "level_02":
-                lo, hi = bbox(e)
-                self.assertLessEqual(hi[0], 60 * FT + 77, e["id"])
-        self.assertFalse([e for e in self.model["elements"] if e["kind"] == "knee_wall"])
+    def test_second_story_matches_the_massing_shell(self):
+        # '40x60 two-story barndominium': the shell is 60' x 40' on both stories. The second floor is
+        # finished over x = 20'..60' and the rest of that story is attic, drawn on the level-2 plan too.
+        attic = [r for r in self.doc["rooms"] if r["usage"] == "attic"]
+        self.assertEqual(len(attic), 1)
+        xs = [p["x"] for p in attic[0]["boundary_polygon"]["points"]]
+        self.assertEqual((round(min(xs) / FT), round(max(xs) / FT)), (60, 80))
+        l2 = [e for e in self.model["elements"] if e["kind"] == "wall_panel" and e["level"] == "level_02"]
+        xs = [p[0] for e in l2 for p in bbox(e)]
+        self.assertAlmostEqual((max(xs) - min(xs)) / FT, 60 + 152 / FT, places=2)
+        self.assertFalse([e for e in self.model["elements"] if e["class"] == "inferred" and e["kind"] == "knee_wall"])
 
     def test_first_floor_walls_keep_plan_height(self):
         for e in self.model["elements"]:
             if e["kind"] == "wall_panel" and e["level"] == "level_01":
                 self.assertLessEqual(bbox(e)[1][2], 2743 + 0.5, e["id"])
 
-    def test_balcony_roof_uses_plan_roof_data(self):
-        plane = by_ref(self.model, "roof_balcony", "roof_plane")[0]
-        zs = sorted({p[2] for p in plane["geom"]["points"]})
-        # eave (outer edge) at level_02 + 2743 minus the overhang drop; nothing repositioned
-        self.assertAlmostEqual(zs[0], 3048 + 2743 - 305 * 0.08328, delta=2)
+    def test_balcony_cover_roof_is_compiled_from_massing(self):
+        roof = next(r for r in self.doc["roofs"] if r["id"] == "roof_balcony_cover")
+        self.assertEqual(roof["derived_from"], "massing:balcony_cover")
+        vol = next(v for v in self.doc["massing"]["volumes"] if v["id"] == "balcony_cover")["roof"]
+        # hung below the main eave (z5791 - 2 x 150 build-up - 50 clearance), pitch chosen for 7'-0" headroom
+        self.assertEqual(vol["attach_height_z"], 5441)
+        self.assertEqual(vol["pitch"], "1/4:12")
+        self.assertGreaterEqual(vol["headroom_mm"], 2134)
+        plane = by_ref(self.model, "roof_balcony_cover", "roof_plane")[0]
+        self.assertAlmostEqual(max(p[2] for p in plane["geom"]["points"]), 5441, delta=1)
 
-    def test_known_plan_roof_issues_are_reported_not_fixed(self):
-        codes = {(i["code"], tuple(i["refs"])) for i in self.model["issues"]}
-        self.assertIn(("roof_edge_unsupported", ("roof_main",)), codes)
-        self.assertIn(("roofs_overlap", ("roof_main", "roof_balcony")), codes)
+    def test_massing_leaves_no_plan_issues(self):
+        self.assertEqual(self.model["issues"], [])
+
+    def test_independently_authored_roofs_are_rejected(self):
+        # The original bug class: floors and roofs authored separately (a 60' roof over a 40' second floor,
+        # a balcony roof at the wrong height). Without the massing layer this must now FAIL validation.
+        from oas_pipeline import validate
+        doc = copy.deepcopy(self.doc)
+        doc.pop("massing"); doc.pop("extensions")
+        doc["rooms"] = [r for r in doc["rooms"] if r["usage"] != "attic"]
+        doc["openings"] = [o for o in doc["openings"] if o["id"] != "l2_d_attic"]
+        doc["walls"] = [w for w in doc["walls"] if not w["id"].startswith("env_")]
+        for w in doc["walls"]:
+            w["adjacent_rooms"] = ["exterior" if r.startswith("main_attic") else r for r in w["adjacent_rooms"]]
+        errs = " | ".join(validate(doc).errors)
+        self.assertIn("roof_main", errs)
+        self.assertIn("above the top of the exterior wall below", errs)
 
     def test_every_non_plan_element_is_labelled(self):
         for e in self.model["elements"]:
@@ -119,7 +140,7 @@ class PlanChangesPropagate(unittest.TestCase):
                 if s["id"] in ("slab_l1_porch", "slab_l2_balcony"):
                     s["rect"] = [20, -8, 60, 0]
             next(r for r in spec["railings"] if r["id"] == "l2_rail_balcony")["points"] = [[20, 0], [20, -8], [60, -8], [60, 0]]
-            next(r for r in spec["roofs"] if r["id"] == "roof_balcony")["rect"] = [20, -8, 60, 0]
+            next(v for v in spec["massing"]["volumes"] if v["id"] == "balcony_cover")["rect"] = [20, -8, 60, 0]
         doc, model = self.rebuild(edit)
         deck = by_ref(model, "l2_balcony", "deck")[0]
         lo, hi = bbox(deck)
@@ -170,13 +191,11 @@ class ConsistencyCatchesDivergence(unittest.TestCase):
     def test_wrong_floor_height(self):
         self.assertIn("[floor heights] level_02", self.errors(lambda m: m["levels"][1].update(elevation_mm=3200)))
 
-    def test_widened_story_is_flagged(self):
-        doc = self.doc
-        model = build_exterior_model(doc, {"infer_roof_bearing_walls": True})
-        rep, _ = check_consistency(doc, model)
-        self.assertEqual(rep.errors, [])
-        self.assertTrue(any("visually extends this story" in w for w in rep.warnings))
-        self.assertTrue(all(e["class"] == "inferred" for e in model["elements"] if e["kind"] == "knee_wall"))
+    def test_dropping_an_envelope_wall_breaks_the_massing(self):
+        def drop(m):
+            m["elements"] = [e for e in m["elements"] if not any(r.startswith("env_main_level_02") for r in e["refs"])]
+        errs = self.errors(drop)
+        self.assertIn("[massing] main on level_02", errs)
 
     def test_renderer_that_moves_an_element_fails_audit(self):
         audit = {"elements": [{"id": e["id"], "min": list(bbox(e)[0]), "max": list(bbox(e)[1])} for e in self.model["elements"]]}

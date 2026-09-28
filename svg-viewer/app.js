@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const unitSelector = document.getElementById('unit-selector');
 
     const EXTERIOR_USAGES = ['porch', 'balcony', 'deck', 'patio', 'terrace', 'exterior'];
-    const SERVICE_USAGES = ['garage', 'mechanical', 'utility'];
+    const SERVICE_USAGES = ['garage', 'mechanical', 'utility', 'attic'];
     const VOID_USAGES = ['void', 'open_to_below'];
 
     let plan = null;

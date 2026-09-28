@@ -5,77 +5,154 @@
   "design_goal": "Two-story 40'x60' barndominium with a 20'x40' attached garage on one end. First floor: master suite, open-concept living/kitchen/dining and a decent-sized pantry beside the kitchen. Second floor: two bedrooms, one full bathroom and a loft, with a 12'x40' covered second-story balcony. Practical layout, good circulation, minimal wasted space; the garage connects logically to the house.",
   "global_constraints": {
     "stories": 2,
-    "building_footprint": {
-      "level": "level_01",
-      "exclude_usages": ["garage", "porch"],
-      "dims_m": [12.192, 18.288]
-    }
+    "building_footprint": [
+      {
+        "level": "level_01",
+        "exclude_usages": [
+          "garage",
+          "porch"
+        ],
+        "dims_m": [
+          12.192,
+          18.288
+        ]
+      },
+      {
+        "level": "level_02",
+        "exclude_usages": [
+          "balcony"
+        ],
+        "dims_m": [
+          12.192,
+          18.288
+        ],
+        "_comment": "'two-story 40x60': the shell is 40x60 on both stories (finished or not)"
+      }
+    ]
   },
   "circulation": {
-    "no_pass_through_usages": ["bedroom"],
-    "allow_behind_usages": ["closet", "bathroom"]
+    "no_pass_through_usages": [
+      "bedroom"
+    ],
+    "allow_behind_usages": [
+      "closet",
+      "bathroom",
+      "attic"
+    ]
   },
   "rooms": [
     {
       "id": "garage",
       "usage": "garage",
       "level": "level_01",
-      "exact_dims_m": [6.096, 12.192],
-      "must_have": ["exterior_access"],
-      "adjacency": { "must_connect": ["mudroom"] },
+      "exact_dims_m": [
+        6.096,
+        12.192
+      ],
+      "must_have": [
+        "exterior_access"
+      ],
+      "adjacency": {
+        "must_connect": [
+          "mudroom"
+        ]
+      },
       "rationale": "20'x40' attached garage; enters the house through a mudroom, not a living space."
     },
     {
       "id": "mudroom",
       "usage": "laundry",
       "level": "level_01",
-      "adjacency": { "must_touch": ["pantry"] }
+      "adjacency": {
+        "must_touch": [
+          "pantry"
+        ]
+      }
     },
     {
       "id": "master_bedroom",
       "usage": "bedroom",
       "level": "level_01",
-      "desired_area_m2": { "min": 14 },
-      "must_have": ["daylight"]
+      "desired_area_m2": {
+        "min": 14
+      },
+      "must_have": [
+        "daylight"
+      ]
     },
     {
       "id": "master_bath",
       "usage": "bathroom",
-      "layout_rooms": ["l1_master_bath"],
-      "desired_area_m2": { "min": 7 }
+      "layout_rooms": [
+        "l1_master_bath"
+      ],
+      "desired_area_m2": {
+        "min": 7
+      }
     },
     {
       "id": "master_closet",
       "usage": "closet",
-      "layout_rooms": ["l1_master_wic"]
+      "layout_rooms": [
+        "l1_master_wic"
+      ]
     },
     {
       "id": "living",
       "usage": "living",
       "level": "level_01",
-      "desired_area_m2": { "min": 25 },
-      "must_have": ["daylight"],
-      "adjacency": { "must_open_to": ["dining"] }
+      "desired_area_m2": {
+        "min": 25
+      },
+      "must_have": [
+        "daylight"
+      ],
+      "adjacency": {
+        "must_open_to": [
+          "dining"
+        ]
+      }
     },
     {
       "id": "dining",
       "usage": "dining",
       "level": "level_01",
-      "adjacency": { "must_open_to": ["kitchen", "living"] }
+      "adjacency": {
+        "must_open_to": [
+          "kitchen",
+          "living"
+        ]
+      }
     },
     {
       "id": "kitchen",
       "usage": "kitchen",
       "level": "level_01",
-      "desired_area_m2": { "min": 14 },
-      "must_have": ["daylight"],
-      "adjacency": { "must_touch": ["pantry"], "must_connect": ["pantry"], "must_open_to": ["dining"] }
+      "desired_area_m2": {
+        "min": 14
+      },
+      "must_have": [
+        "daylight"
+      ],
+      "adjacency": {
+        "must_touch": [
+          "pantry"
+        ],
+        "must_connect": [
+          "pantry"
+        ],
+        "must_open_to": [
+          "dining"
+        ]
+      }
     },
     {
       "id": "pantry",
       "usage": "pantry",
       "level": "level_01",
-      "desired_area_m2": { "min": 4.5 },
+      "desired_area_m2": {
+        "min": 4.5
+      },
       "rationale": "Decent-sized walk-in pantry (at least ~48 sf) directly off the kitchen."
     },
     {
@@ -83,28 +160,41 @@
       "usage": "bedroom",
       "level": "level_02",
       "count": 2,
-      "desired_area_m2": { "min": 9.3 },
-      "must_have": ["daylight"]
+      "desired_area_m2": {
+        "min": 9.3
+      },
+      "must_have": [
+        "daylight"
+      ]
     },
     {
       "id": "upstairs_bath",
       "usage": "bathroom",
       "level": "level_02",
       "count": 1,
-      "desired_area_m2": { "min": 3.7 }
+      "desired_area_m2": {
+        "min": 3.7
+      }
     },
     {
       "id": "loft",
       "usage": "loft",
       "level": "level_02",
-      "desired_area_m2": { "min": 18 },
-      "must_have": ["balcony_access"]
+      "desired_area_m2": {
+        "min": 18
+      },
+      "must_have": [
+        "balcony_access"
+      ]
     },
     {
       "id": "balcony",
       "usage": "balcony",
       "level": "level_02",
-      "exact_dims_m": [3.6576, 12.192]
+      "exact_dims_m": [
+        3.6576,
+        12.192
+      ]
     }
   ]
 }

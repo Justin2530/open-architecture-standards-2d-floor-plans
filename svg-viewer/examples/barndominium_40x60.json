@@ -964,6 +964,49 @@
         "open_to_below",
         "not_floor_area"
       ]
+    },
+    {
+      "id": "main_attic_level_02",
+      "name": "Attic (unfinished)",
+      "usage": "attic",
+      "type_name": "IfcSpace",
+      "level": "level_02",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 24384,
+            "y": 15850
+          },
+          {
+            "x": 18288,
+            "y": 15850
+          },
+          {
+            "x": 18288,
+            "y": 13107
+          },
+          {
+            "x": 18288,
+            "y": 11583
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          },
+          {
+            "x": 24384,
+            "y": 3658
+          }
+        ]
+      },
+      "area_m2": 74.32,
+      "tags": [
+        "unconditioned",
+        "from_massing",
+        "volume:main"
+      ]
     }
   ],
   "walls": [
@@ -2077,7 +2120,7 @@
       "structural": true,
       "adjacent_rooms": [
         "l2_open_below",
-        "exterior"
+        "main_attic_level_02"
       ]
     },
     {
@@ -2098,7 +2141,7 @@
       "structural": true,
       "adjacent_rooms": [
         "l2_bed3_closet",
-        "exterior"
+        "main_attic_level_02"
       ]
     },
     {
@@ -2119,7 +2162,7 @@
       "structural": true,
       "adjacent_rooms": [
         "l2_bed3",
-        "exterior"
+        "main_attic_level_02"
       ]
     },
     {
@@ -2393,6 +2436,72 @@
       "adjacent_rooms": [
         "l2_bed3",
         "l2_bed3_closet"
+      ]
+    },
+    {
+      "id": "env_main_level_02_1",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 18289,
+        "y": 3658
+      },
+      "to": {
+        "x": 24384,
+        "y": 3658
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "derived_from": "massing:main",
+      "adjacent_rooms": [
+        "main_attic_level_02",
+        "exterior"
+      ]
+    },
+    {
+      "id": "env_main_level_02_2",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 24384,
+        "y": 3658
+      },
+      "to": {
+        "x": 24384,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "derived_from": "massing:main",
+      "adjacent_rooms": [
+        "main_attic_level_02",
+        "exterior"
+      ]
+    },
+    {
+      "id": "env_main_level_02_3",
+      "type_name": "IfcWall",
+      "from": {
+        "x": 24384,
+        "y": 15850
+      },
+      "to": {
+        "x": 18289,
+        "y": 15850
+      },
+      "unit": "mm",
+      "thickness_mm": 152,
+      "wall_height_mm": 2743,
+      "level": "level_02",
+      "structural": true,
+      "derived_from": "massing:main",
+      "adjacent_rooms": [
+        "main_attic_level_02",
+        "exterior"
       ]
     }
   ],
@@ -2906,7 +3015,7 @@
       "level": "level_02",
       "position_along_wall_mm": 610,
       "width_mm": 914,
-      "height_mm": 1524,
+      "height_mm": 1219,
       "sill_height_mm": 914,
       "is_fixed": true,
       "connects_rooms": [
@@ -2922,7 +3031,7 @@
       "level": "level_02",
       "position_along_wall_mm": 4420,
       "width_mm": 762,
-      "height_mm": 1524,
+      "height_mm": 1219,
       "sill_height_mm": 914,
       "is_fixed": true,
       "connects_rooms": [
@@ -3136,6 +3245,24 @@
       "connects_rooms": [
         "l2_bed3",
         "l2_bed3_closet"
+      ]
+    },
+    {
+      "id": "l2_d_attic",
+      "opening_type": "door",
+      "type_name": "Attic Access Door 2'-0\" x 4'-0\"",
+      "in_wall": "l2_w_east_2",
+      "level": "level_02",
+      "position_along_wall_mm": 152,
+      "width_mm": 610,
+      "height_mm": 1219,
+      "is_fixed": false,
+      "operation": "swing",
+      "swing_direction": "outward",
+      "hinge_side": "left",
+      "connects_rooms": [
+        "l2_bed3_closet",
+        "main_attic_level_02"
       ]
     }
   ],
@@ -3465,54 +3592,9 @@
         305,
         305,
         305,
-        0
-      ]
-    },
-    {
-      "id": "roof_balcony",
-      "type_name": "IfcRoof",
-      "level": "level_02",
-      "level_offset_mm": 2743,
-      "boundary_polygon": {
-        "unit": "mm",
-        "closed": true,
-        "points": [
-          {
-            "x": 6096,
-            "y": 0
-          },
-          {
-            "x": 18288,
-            "y": 0
-          },
-          {
-            "x": 18288,
-            "y": 3658
-          },
-          {
-            "x": 6096,
-            "y": 3658
-          }
-        ]
-      },
-      "slope_angles": [
-        4.76,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "defines_slope": [
-        true,
-        false,
-        false,
-        false
-      ],
-      "eave_overhang_mm": [
-        305,
-        305,
-        0,
         305
-      ]
+      ],
+      "derived_from": "massing:main"
     },
     {
       "id": "roof_garage",
@@ -3558,7 +3640,55 @@
         0,
         305,
         305
-      ]
+      ],
+      "derived_from": "massing:garage"
+    },
+    {
+      "id": "roof_balcony_cover",
+      "type_name": "IfcRoof",
+      "level": "level_02",
+      "level_offset_mm": 2317,
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          {
+            "x": 6096,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 0
+          },
+          {
+            "x": 18288,
+            "y": 3658
+          },
+          {
+            "x": 6096,
+            "y": 3658
+          }
+        ]
+      },
+      "slope_angles": [
+        1.19,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "defines_slope": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "eave_overhang_mm": [
+        305,
+        305,
+        0,
+        305
+      ],
+      "derived_from": "massing:balcony_cover"
     }
   ],
   "connections": [
@@ -3705,6 +3835,11 @@
     {
       "from": "l2_bed3",
       "to": "l2_bed3_closet",
+      "type": "direct"
+    },
+    {
+      "from": "l2_bed3_closet",
+      "to": "main_attic_level_02",
       "type": "single_access"
     },
     {
@@ -3720,6 +3855,145 @@
   "metadata": {
     "generated_by": "Claude Code (OAS skills: oas-layout, oas-geometry, oas-core)",
     "timestamp": "2026-09-28T00:00:00Z",
-    "notes": "40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Upper floor covers the west 40' of the house; the master suite below the east 20' has attic/mechanical space above."
+    "notes": "40'x60' two-story barndominium with 20'x40' side-load garage on the west end and a 12'x40' covered second-story balcony over a covered front porch. Authored on a foot grid and converted to integer mm (1 ft = 304.8 mm, rounded). +Y = north; origin at the SW corner of the porch/balcony, so the front (south) wall is at y=3658 and the garage west wall at x=0. Room polygons are drawn to wall centerlines. Levels share one XY frame (stacked). Stair: straight run, 16 risers x 190.5 mm = 3048 mm, 15 treads x 254 mm, 1067 mm wide, ascending north from the foyer to the second-floor hall; the second-floor stairwell (l2_stair) has the identical footprint. Door swing convention: 'inward' = leaf swings to the left of the host wall's from->to direction (matches svg-viewer/app.js); hinge_side 'left' = hinge at the opening start. Open-plan boundaries (kitchen/dining/living, foyer cased opening, hall to dining, loft to hall) intentionally have no wall. Massing: one 40'x60' two-story shell (barndominium typology) under a single 4:12 gable; the second floor is finished over the west 40' and the east 20' of that story is unfinished attic (reached from the Bedroom 3 closet). Garage: attached one-story volume with a 1:12 lean-to roof. Balcony and porch share a cover roof hung below the main eave, pitched for 7'-0\" headroom. Roofs and envelope walls are compiled from the massing volumes."
+  },
+  "extensions": {
+    "oas-massing": {
+      "version": "0.1.0"
+    }
+  },
+  "massing": {
+    "typology": "barndominium",
+    "volumes": [
+      {
+        "id": "main",
+        "role": "shell",
+        "levels": [
+          "level_01",
+          "level_02"
+        ],
+        "attach_to": null,
+        "covers": [],
+        "footprint": {
+          "unit": "mm",
+          "closed": true,
+          "points": [
+            {
+              "x": 6096,
+              "y": 3658
+            },
+            {
+              "x": 24384,
+              "y": 3658
+            },
+            {
+              "x": 24384,
+              "y": 15850
+            },
+            {
+              "x": 6096,
+              "y": 15850
+            }
+          ]
+        },
+        "plate_z_mm": 5791,
+        "roof": {
+          "id": "roof_main",
+          "form": "gable",
+          "ridge_axis": "x",
+          "pitch_deg": 18.43,
+          "base_z": 5791,
+          "level": "level_02"
+        }
+      },
+      {
+        "id": "garage",
+        "role": "garage",
+        "levels": [
+          "level_01"
+        ],
+        "attach_to": "main",
+        "covers": [],
+        "footprint": {
+          "unit": "mm",
+          "closed": true,
+          "points": [
+            {
+              "x": 0,
+              "y": 3658
+            },
+            {
+              "x": 6096,
+              "y": 3658
+            },
+            {
+              "x": 6096,
+              "y": 15850
+            },
+            {
+              "x": 0,
+              "y": 15850
+            }
+          ]
+        },
+        "plate_z_mm": 2743,
+        "roof": {
+          "id": "roof_garage",
+          "form": "shed",
+          "pitch": "1:12",
+          "pitch_deg": 4.76,
+          "attached_edge": 1,
+          "low_edge": 3,
+          "high_z": 3251,
+          "base_z": 2743,
+          "level": "level_01"
+        }
+      },
+      {
+        "id": "balcony_cover",
+        "role": "cover",
+        "levels": [],
+        "attach_to": "main",
+        "covers": [
+          "l1_porch",
+          "l2_balcony"
+        ],
+        "footprint": {
+          "unit": "mm",
+          "closed": true,
+          "points": [
+            {
+              "x": 6096,
+              "y": 0
+            },
+            {
+              "x": 18288,
+              "y": 0
+            },
+            {
+              "x": 18288,
+              "y": 3658
+            },
+            {
+              "x": 6096,
+              "y": 3658
+            }
+          ]
+        },
+        "roof": {
+          "id": "roof_balcony_cover",
+          "form": "shed",
+          "attach_height_z": 5441,
+          "headroom_mm": 2192,
+          "pitch": "1/4:12",
+          "pitch_deg": 1.19,
+          "attached_edge": 2,
+          "low_edge": 0,
+          "high_z": 5441,
+          "base_z": 5365,
+          "level": "level_02"
+        }
+      }
+    ]
   }
 }
