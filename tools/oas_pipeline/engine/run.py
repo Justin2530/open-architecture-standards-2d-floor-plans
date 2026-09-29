@@ -100,7 +100,7 @@ def design(text: str | None, out_dir: str, brief: dict | None = None, render=Fal
     valid = [r for r in results if r.get("valid")]
     rep["candidates"] = [{"index": r["index"], "valid": r.get("valid", False), "error": r.get("error"),
                           "score": r.get("score", {}).get("total"), "groups": r.get("score", {}).get("groups"),
-                          "params": {k: r["params"][k] for k in ("W", "D", "Wm", "Wg", "Wc", "bw", "Dk", "Dmb", "msplit", "mirror")}}
+                          "params": {k: r["params"][k] for k in ("W", "D", "Wm", "Wg", "Wc", "bw", "Dk", "Dmb", "msplit", "kids", "mirror")}}
                          for r in results]
     for r in results:
         if not r.get("valid"):
@@ -117,10 +117,13 @@ def design(text: str | None, out_dir: str, brief: dict | None = None, render=Fal
         f"building {p['W']:.1f}' x {p['D']:.1f}' main body; buildable width from lot {brief.get('lot', {}).get('width_ft')}' "
         f"minus {ranch.RULES['site']['side_setback_ft']}' side setbacks (inferred)",
         f"master suite: {'walk-through closet to bath' if p['msplit'] == 'walk_through' else 'bath and closet side by side'}",
-        f"garage {p['gw']}' x {p['gd']}' projecting forward at the kids-wing end, entering through the laundry/mud room",
+        "secondary bedroom(s) off a hall column beside them" if p["kids"] == "hall_column" else
+        "compact kids wing: bedroom and bath off a short cross hall (saves a hall column on a narrow lot)",
+        (f"garage {p['gw']}' x {p['gd']}' projecting forward at the kids-wing end, entering through the laundry/mud room"
+         + (" (wide garage also runs in front of the foyer)" if p["gw"] - p["Wk"] > p["Wc"] else "")) if p["gw"] else "no garage requested",
         "covered entry porch added by brain default (covered_entry_by_default)",
         f"{len(cands)} candidates generated, {len(valid)} valid; chose #{best['index']} (score {best['score']['total']})",
-        "mirror image offered as the same design for a garage on the other side" if any(c['params']['mirror'] for c in cands) else "",
+        "mirror image of the best layout offered (same design, garage on the other side)",
     ]
     rep["decisions"]["solver"] = [d for d in rep["decisions"]["solver"] if d]
 

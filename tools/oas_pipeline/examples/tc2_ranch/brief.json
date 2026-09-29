@@ -1,0 +1,32 @@
+{
+  "typology": "ranch",
+  "stories": 1,
+  "target_conditioned_sf": 1800,
+  "bedrooms": 3,
+  "bathrooms": 2,
+  "master_separate_from_other_bedrooms": true,
+  "open_kitchen_family": true,
+  "kitchen_island": "large",
+  "garage": {
+    "cars": 2,
+    "attached": true,
+    "position": "front"
+  },
+  "outdoor": [
+    {
+      "kind": "patio",
+      "location": "rear",
+      "covered": true
+    }
+  ],
+  "lot": {
+    "width_ft": 70
+  },
+  "style": null,
+  "assumptions": [
+    "big island read as large island",
+    "master bedroom in separate zone from other bedrooms for privacy"
+  ],
+  "questions": [],
+  "plan_id": "tc_design"
+}

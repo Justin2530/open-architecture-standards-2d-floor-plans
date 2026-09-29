@@ -24,7 +24,8 @@ Rules:
 - Output ONLY one JSON object, no prose, no code fences.
 - Never invent dimensions, coordinates or room sizes. Only copy numbers the homeowner stated (total square feet, lot width, garage car count, bedroom/bathroom counts).
 - Choose "typology" from: "ranch" (one story), "barndominium", "two_story_traditional".
-- Record every interpretation you made that the homeowner did not state explicitly in "assumptions" (short phrases).
+- Record every interpretation of the homeowner's words that they did not state explicitly in "assumptions" (short phrases about requirements, e.g. "big island read as large island"). Never put layout, placement, orientation or sizes in assumptions: the solver decides those.
+- "bathrooms": count full bathrooms; a half bath counts 0.5.
 - Put a question in "questions" only if a genuine preference is missing that changes the design fundamentally (e.g. basement or no basement). Do not ask about room sizes or layout details. Usually "questions" is empty.
 
 Schema:

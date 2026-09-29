@@ -31,6 +31,10 @@ python3 tools/oas_pipeline generate SPEC.json -o out/
 python3 tools/oas_pipeline validate PLAN.json [--program PROGRAM.json] [--json]
 python3 tools/oas_pipeline render   PLAN.json -o out/
 
+# homeowner text -> brief (1 LLM call) -> solver -> validated, scored design (+ plan and 3D views)
+python3 tools/oas_pipeline design "We'd like a one-story ranch, about 1,800 sf ..." -o out/ --render
+python3 tools/oas_pipeline design --brief tools/oas_pipeline/examples/tc2_ranch/brief.json -o out/   # replay, no LLM
+
 # tests
 python3 -m unittest discover -s tools/oas_pipeline/tests
 ```
@@ -42,6 +46,7 @@ python3 -m unittest discover -s tools/oas_pipeline/tests
 | Example | What it shows |
 |---|---|
 | [`examples/barndominium_40x60/`](examples/barndominium_40x60/) | Two-story 40'×60' barndominium with garage, loft, open-to-below great room and covered balcony. Authored in feet. Its compiled output is the committed viewer example [`svg-viewer/examples/barndominium_40x60.json`](../../svg-viewer/examples/barndominium_40x60.json); a regression test keeps them identical. `program.json` encodes the original brief. |
+| [`examples/tc2_ranch/`](examples/tc2_ranch/) | TEST CASE #2: homeowner text → one-story ranch, generated end to end by the `design` command (recorded brief, report, spec, plan and views). |
 | [`examples/simple_cabin/`](examples/simple_cabin/) | Minimal single-level, metric spec: the smallest useful starting point. |
 
 To start a new design, copy `simple_cabin/`, write a `program.json` for the brief, then iterate
@@ -215,9 +220,16 @@ It is purely aesthetic and never moves geometry.
 | `validate.py` | `PlanModel` (geometry + circulation graph), `validate()`, `Rules` |
 | `program.py` | `check_program()` against an OAS-Program brief |
 | `render.mjs` | Playwright script: screenshot every level in `svg-viewer` |
-| `__main__.py` | CLI (`build`, `generate`, `validate`, `render`) |
+| `__main__.py` | CLI (`build`, `generate`, `validate`, `render`, `exterior`, `design`) |
 | `exterior/model.py` | plan → 3D exterior model with provenance and plan-issue reporting |
 | `exterior/consistency.py` | plan ↔ 3D ↔ drawn-scene consistency check |
 | `exterior/viewer/`, `exterior/render.mjs` | three.js renderer (draw-only) and headless screenshot + audit script |
 | `exterior/design_defaults.json` | default exterior design spec (inferred/aesthetic parameters) |
+| `derive.py` | walls from rooms (`"walls": "derive"`), relational openings (`between` / `room` + `facade`) |
+| `brain/rules.json` | house-design rules as data: room sizes/proportions, garage sizes, door and window rules, setbacks |
+| `brain/scoring.json`, `scoring.py` | joint interior + exterior scoring (weights, metrics, adjacency preferences) |
+| `brain/typologies.json`, `massing.py` | massing volumes → envelope walls, roofs, unassigned spaces |
+| `solver/ranch.py` | deterministic split-bedroom ranch solver: brief → candidate specs (raises `Unsupported` with a reason) |
+| `engine/intake.py` | one LLM call: homeowner text → brief (no geometry) |
+| `engine/run.py` | `design()`: intake → solver → full pipeline per candidate → best design + timed report |
 | `tests/` | regression, fault-injection, spec-error, plan→3D propagation tests |

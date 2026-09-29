@@ -17,7 +17,8 @@ Openings may name a relationship instead of a wall and offset::
 
 Placement is deterministic. Doors try the start corner, the end corner, then the centre, and keep
 the first position whose swing stays inside the room and clears walls and earlier swings.
-Windows are centred (``count`` > 1 spreads them evenly). Any request that cannot be satisfied
+Windows are centred (``count`` > 1 spreads them evenly; ``min_count`` accepts fewer when the wall is
+short). Any request that cannot be satisfied
 raises a SpecError naming the opening.
 """
 from __future__ import annotations
@@ -236,7 +237,7 @@ def resolve_openings(gen, SpecError):
                     swings.setdefault(lv, []).append(q)
                     hinge = "left" if hs else "right"
                 placed.setdefault(w["id"], []).append((s, s + width))
-                c = {k: v for k, v in o.items() if k not in ("between", "room", "facade", "position", "count", "spread")}
+                c = {k: v for k, v in o.items() if k not in ("between", "room", "facade", "position", "count", "min_count", "spread")}
                 c.update({"id": oid if count == 1 else f"{oid}_{made + 1}", "wall": w["id"], "position_mm": s})
                 if hinge:
                     c["hinge"] = hinge
@@ -246,7 +247,7 @@ def resolve_openings(gen, SpecError):
                 made += 1
                 if made >= count or n_here == 1:
                     break
-        if made < count:
+        if made < o.get("min_count", count):
             raise SpecError(f"opening {oid!r}: could only place {made} of {count} between {a!r} and {b!r} "
                             "(walls too short, or every position collides with another door or wall)")
     return out

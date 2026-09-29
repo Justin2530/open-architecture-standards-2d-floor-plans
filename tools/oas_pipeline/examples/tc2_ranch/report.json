@@ -1,0 +1,397 @@
+{
+  "input": "We'd like a one-story ranch, about 1,800 square feet, three bedrooms and two bathrooms. Master bedroom away from the kids' rooms. Open kitchen and family room with a big island. Two-car garage attached at the front. Covered patio out back. Our lot is 70 feet wide.",
+  "ai": {
+    "calls": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2298,
+    "output_tokens": 232,
+    "thinking_tokens": 0,
+    "cost_usd": 0.003458,
+    "api_seconds": 2.52,
+    "wall_seconds": 5.82,
+    "prompt_chars": 1910,
+    "response_chars": 615
+  },
+  "timing_s": {
+    "intake_llm": 5.82,
+    "solver_enumerate": 0.13,
+    "candidates_full_pipeline": 5.722,
+    "per_candidate_avg": 0.715,
+    "write_outputs": 0.007,
+    "total_generation": 11.68,
+    "deterministic_total": 5.859,
+    "render_floor_plans": 1.77,
+    "render_exterior_views": 13.31
+  },
+  "decisions": {
+    "ai": [
+      "big island read as large island",
+      "master bedroom in separate zone from other bedrooms for privacy"
+    ],
+    "solver": [
+      "typology template: split-bedroom ranch (master wing / great room / kitchen column / kids wing)",
+      "building 59.0' x 30.5' main body; buildable width from lot 70' minus 5' side setbacks (inferred)",
+      "master suite: walk-through closet to bath",
+      "secondary bedroom(s) off a hall column beside them",
+      "garage 22' x 22' projecting forward at the kids-wing end, entering through the laundry/mud room",
+      "covered entry porch added by brain default (covered_entry_by_default)",
+      "8 candidates generated, 8 valid; chose #2 (score 92.1)",
+      "mirror image of the best layout offered (same design, garage on the other side)"
+    ]
+  },
+  "failures": [],
+  "manual_intervention": "none",
+  "brief": {
+    "typology": "ranch",
+    "stories": 1,
+    "target_conditioned_sf": 1800,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "master_separate_from_other_bedrooms": true,
+    "open_kitchen_family": true,
+    "kitchen_island": "large",
+    "garage": {
+      "cars": 2,
+      "attached": true,
+      "position": "front"
+    },
+    "outdoor": [
+      {
+        "kind": "patio",
+        "location": "rear",
+        "covered": true
+      }
+    ],
+    "lot": {
+      "width_ft": 70
+    },
+    "style": null,
+    "assumptions": [
+      "big island read as large island",
+      "master bedroom in separate zone from other bedrooms for privacy"
+    ],
+    "questions": [],
+    "plan_id": "tc_design"
+  },
+  "candidates": [
+    {
+      "index": 0,
+      "valid": true,
+      "error": null,
+      "score": 91.8,
+      "groups": {
+        "interior": 93.0,
+        "exterior": 90.0
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 20,
+        "Wc": 13,
+        "bw": 10.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 1,
+      "valid": true,
+      "error": null,
+      "score": 90.3,
+      "groups": {
+        "interior": 93.0,
+        "exterior": 86.2
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 19,
+        "Wc": 13,
+        "bw": 11.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 2,
+      "valid": true,
+      "error": null,
+      "score": 92.1,
+      "groups": {
+        "interior": 93.1,
+        "exterior": 90.6
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 18,
+        "Wc": 13,
+        "bw": 12.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 3,
+      "valid": true,
+      "error": null,
+      "score": 90.3,
+      "groups": {
+        "interior": 93.0,
+        "exterior": 86.2
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 19,
+        "Wc": 14,
+        "bw": 10.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 4,
+      "valid": true,
+      "error": null,
+      "score": 92.0,
+      "groups": {
+        "interior": 93.0,
+        "exterior": 90.5
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 18,
+        "Wc": 14,
+        "bw": 11.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 5,
+      "valid": true,
+      "error": null,
+      "score": 92.0,
+      "groups": {
+        "interior": 93.1,
+        "exterior": 90.4
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 17,
+        "Wc": 14,
+        "bw": 12.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 6,
+      "valid": true,
+      "error": null,
+      "score": 92.0,
+      "groups": {
+        "interior": 93.0,
+        "exterior": 90.5
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 18,
+        "Wc": 15,
+        "bw": 10.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": false
+      }
+    },
+    {
+      "index": 7,
+      "valid": true,
+      "error": null,
+      "score": 91.9,
+      "groups": {
+        "interior": 93.0,
+        "exterior": 90.4
+      },
+      "params": {
+        "W": 59.0,
+        "D": 30.5,
+        "Wm": 12,
+        "Wg": 20,
+        "Wc": 13,
+        "bw": 10.5,
+        "Dk": 14,
+        "Dmb": 13,
+        "msplit": "walk_through",
+        "kids": "hall_column",
+        "mirror": true
+      }
+    }
+  ],
+  "chosen": 2,
+  "validation": {
+    "errors": [],
+    "warnings": []
+  },
+  "program_check": {
+    "errors": []
+  },
+  "consistency": {
+    "errors": []
+  },
+  "score": {
+    "total": 92.1,
+    "groups": {
+      "interior": 93.1,
+      "exterior": 90.6
+    },
+    "conditioned_sf": 1799,
+    "metrics": {
+      "area_fit": {
+        "group": "interior",
+        "score": 1.0,
+        "weight": 2,
+        "measured": "1799 sf vs target 1800 (-0.0%)",
+        "note": ""
+      },
+      "room_sizes": {
+        "group": "interior",
+        "score": 1.0,
+        "weight": 3,
+        "measured": "14 rooms checked",
+        "note": ""
+      },
+      "proportions": {
+        "group": "interior",
+        "score": 1.0,
+        "weight": 2,
+        "measured": "14 rooms",
+        "note": ""
+      },
+      "circulation_ratio": {
+        "group": "interior",
+        "score": 1.0,
+        "weight": 2,
+        "measured": "9.8% of conditioned area",
+        "note": ""
+      },
+      "adjacency": {
+        "group": "interior",
+        "score": 0.875,
+        "weight": 3,
+        "measured": "12 weighted pairs",
+        "note": "garage-kitchen: far; bedroom-bathroom: 2 steps"
+      },
+      "privacy": {
+        "group": "interior",
+        "score": 0.943,
+        "weight": 2,
+        "measured": "master to nearest bedroom 14.2 m; master_bed opens onto family",
+        "note": ""
+      },
+      "wet_room_clustering": {
+        "group": "interior",
+        "score": 0.451,
+        "weight": 1,
+        "measured": "max wet-room spread 14.6 m",
+        "note": ""
+      },
+      "daylight": {
+        "group": "interior",
+        "score": 0.933,
+        "weight": 2,
+        "measured": "6 habitable rooms",
+        "note": "dining borrowed light"
+      },
+      "entry_prominence": {
+        "group": "exterior",
+        "score": 1.0,
+        "weight": 3,
+        "measured": "entry on front: True, covered: True",
+        "note": ""
+      },
+      "garage_dominance": {
+        "group": "exterior",
+        "score": 1.0,
+        "weight": 2,
+        "measured": "garage doors 31% of street-facade width",
+        "note": ""
+      },
+      "front_glazing": {
+        "group": "exterior",
+        "score": 0.706,
+        "weight": 2,
+        "measured": "7.1% of front wall area glazed",
+        "note": ""
+      },
+      "blank_walls": {
+        "group": "exterior",
+        "score": 0.901,
+        "weight": 2,
+        "measured": "4 facade-levels",
+        "note": "left level_01: 4.9 m blank; right level_01: 5.6 m blank"
+      },
+      "head_alignment": {
+        "group": "exterior",
+        "score": 1.0,
+        "weight": 1,
+        "measured": "12 openings",
+        "note": ""
+      },
+      "opening_rhythm": {
+        "group": "exterior",
+        "score": 0.558,
+        "weight": 1,
+        "measured": "spacing variation 0.44",
+        "note": ""
+      },
+      "massing_simplicity": {
+        "group": "exterior",
+        "score": 1.0,
+        "weight": 2,
+        "measured": "4 volumes, 8 roof planes",
+        "note": ""
+      }
+    }
+  },
+  "outputs": {
+    "plan": "tc_design.json",
+    "spec": "tc_design.spec.json",
+    "exterior_model": "tc_design.exterior.json"
+  },
+  "consistency_with_renderer_audit": {
+    "errors": []
+  },
+  "note": "Recorded end-to-end run from homeowner.txt (one LLM intake call, then deterministic solver/pipeline, then renders in views/). Replay without the LLM: python3 tools/oas_pipeline design --brief brief.json -o out/"
+}

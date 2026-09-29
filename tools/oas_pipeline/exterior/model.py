@@ -626,9 +626,13 @@ class ExteriorModelBuilder:
             top = e["geom"]["points"][0][2]
             foot = Polygon(pts)
             for rf in roofs:
-                if not rf["poly"].buffer(max(rf["over"] or [0]) + 1).contains(foot.representative_point()):
+                # only the part of the deck actually under this roof (its outline with each edge's own
+                # overhang; a valley extension into the host roof must not count as cover elsewhere)
+                under = foot.intersection(self.roof_outline(rf))
+                if under.area < 0.1 * foot.area:
                     continue
-                low = min(self.roof_height(rf, x, y) for x, y in pts) - t
+                low = min(self.roof_height(rf, x, y) for g in getattr(under, "geoms", [under])
+                          for x, y in getattr(g, "exterior", g).coords) - t
                 if low <= top:
                     continue  # this roof is below the deck (not covering it)
                 # only the lowest covering roof above this deck matters

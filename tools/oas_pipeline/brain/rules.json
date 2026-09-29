@@ -141,12 +141,16 @@
   "outdoor": {
     "entry_porch_depth": 6,
     "patio_depth": 12,
-    "covered_entry_by_default": true
+    "covered_entry_by_default": true,
+    "entry_porch_min_width": 8
   },
   "circulation": {
     "hall_width": 3.5,
     "min_door_run_ft": 4.0,
-    "_comment": "min_door_run_ft: shortest shared wall that fits a 2'-8\" door plus 200 mm corner clearance each side"
+    "_comment": "min_door_run_ft: shortest shared wall that fits a 2'-8\" door plus 200 mm corner clearance each side; garage_door_run_ft the same for the 3'-0\" garage-house door; cross hall: compact hall between a secondary bedroom and its bath (fits a cased opening)",
+    "garage_door_run_ft": 4.5,
+    "cross_hall_depth": 5,
+    "cross_hall_length": 5
   },
   "site": {
     "side_setback_ft": 5,

@@ -66,37 +66,48 @@ def candidates(brief, limit=8):
     island = brief.get("kitchen_island", "none")
     large = island == "large"
     kmin = R["kitchen"]["large_island"]["min_dim"] if large else (R["kitchen"]["min_dim_with_island"] if island not in (None, False, "none") else R["kitchen"]["min_dim"])
-    out = []
+    fam_min, porch_min = R["family"]["min_dim"], RULES["outdoor"]["entry_porch_min_width"]
+    garage_door_run = RULES["circulation"]["garage_door_run_ft"]
+    # kids wing: a hall column beside the bedrooms, or (one secondary bedroom) a short cross hall
+    # between bedroom and bath, which saves the hall column on narrow lots
+    kids_opts = ("hall_column", "cross_hall") if s == 1 else ("hall_column",)
+    out, narrowest = [], None
     grid = itertools.product(
-        (13, 14, 15),            # master wing width
-        (13, 14, 15) if large else (12, 13, 14),  # kitchen column width
-        (11.5, 12, 12.5),        # secondary bedroom width
-        (7, 8),                  # foyer depth
-        (7, 8),                  # laundry depth
+        (12, 13, 14, 15),                                # master wing width
+        (kmin, kmin + 1, kmin + 2),                      # kitchen column width
+        (10.5, 11.5, 12.5),                              # secondary bedroom width
+        kids_opts,
+        range(int(fam_min), 23),                         # great-room column width (sets the building width)
+        (7, 8),                                          # foyer depth
+        (7, 8),                                          # laundry depth
         (kmin + 1, kmin + 2) if large else (kmin, kmin + 1),  # kitchen depth
-        (13, 14, 15),            # master bedroom depth
-        (6.5, 7.5),              # hall-bath depth (between stacked bedrooms)
-        (0, 2, 4),               # width held back from the buildable maximum
-        ("side_by_side", "walk_through"),  # master bath/closet arrangement
-        (False, True))           # mirrored
-    for Wm, Wc, bw, Df, Dl, Dk, Dmb, Dbath, slack, msplit, mirror in grid:
-        Wk = bw + hall
-        if g and not (3.5 <= gw - Wk <= Wc - 1):
-            continue  # garage must overlap the laundry (kitchen column front) for the garage-house door
-        W_max = buildable if buildable else Wm + Wc + Wk + 18
-        W = W_max - slack
-        Wg = W - Wm - Wc - Wk
-        if not (14 <= Wg <= 22):
+        (13, 14, 15),                                    # master bedroom depth
+        (6.5, 7.5, 8.5),                                 # hall-bath depth
+        ("side_by_side", "walk_through"))                # master bath/closet arrangement
+    for Wm, Wc, bw, kids, Wg, Df, Dl, Dk, Dmb, Dbath, msplit in grid:
+        Wk = bw + (hall if kids == "hall_column" else 0)
+        W = Wm + Wg + Wc + Wk
+        narrowest = W if narrowest is None else min(narrowest, W)
+        if buildable and W > buildable:
             continue
+        if g:
+            # the garage projects forward at the kids-wing end and must reach the laundry (garage-house door);
+            # a wide garage may run on past the laundry in front of the foyer if the entry porch still fits
+            ov = gw - Wk
+            if ov < garage_door_run or Wc - 1 < ov < Wc or W - gw - Wm < porch_min:
+                continue
         D = half(target / W)
-        if not (26 <= D <= 38):
+        if not (24 <= D <= 40):
             continue
         Ddin = D - Dl - Dk
-        Db = (D - Dbath) / s if s == 2 else D - Dbath
-        if Ddin < R["dining"]["min_dim"] or Db < R["bedroom"]["min_dim"] or D - Dmb < 8 or D - Df < 13:
+        cross = RULES["circulation"]["cross_hall_depth"]
+        Db = (D - Dbath) / s if s == 2 else D - Dbath - (cross if kids == "cross_hall" else 0)
+        if kids == "cross_hall" and not (Dl <= Db and Db + cross <= Dl + Ddin or Db >= D - Dk):
+            continue  # the cross hall must open off one room (dining or kitchen), not straddle two
+        if Ddin < R["dining"]["min_dim"] or Db < R["bedroom"]["min_dim"] or D - Dmb < 8 or D - Df < fam_min:
             continue
         p = dict(W=W, D=D, Wm=Wm, Wg=Wg, Wc=Wc, Wk=Wk, bw=bw, Df=Df, Dl=Dl, Dk=Dk, Ddin=Ddin, Dmb=Dmb,
-                 Dbath=Dbath, Db=Db, s=s, gw=gw, gd=gd, mirror=mirror, hall=hall, msplit=msplit,
+                 Dbath=Dbath, Db=Db, s=s, gw=gw, gd=gd, mirror=False, hall=hall, msplit=msplit, kids=kids,
                  kitchen_rule="large_island" if large else "kitchen")
         # walk-through: closet (next to the bedroom) then bath (front); side-by-side: bath | closet
         Dm = D - Dmb
@@ -106,24 +117,25 @@ def candidates(brief, limit=8):
                 continue
         out.append((pre_score(p, target), p))
     if not out:
-        raise Unsupported("no template parameters satisfy the brief (lot too narrow for the area, or area outside 1,000-3,000 sf)")
+        if buildable and narrowest and narrowest > buildable:
+            raise Unsupported(f"lot {lot:g}' wide leaves {buildable:g}' between the {setback:g}' side setbacks; the split-bedroom "
+                              f"ranch template needs at least {narrowest:g}' (a narrow-lot or two-story template is needed)")
+        raise Unsupported("no template parameters satisfy the brief (area outside roughly 1,000-3,000 sf for this lot, "
+                          "or the garage cannot reach the house entry)")
     out.sort(key=lambda t: -t[0])
-    # Diversify: best candidate per structural choice (mirror images are the same design on a flipped lot,
-    # so only the best design is also offered mirrored).
+    # Diversify: best candidate per structural choice. The best design is also offered mirrored
+    # (same design for a lot where the garage should sit on the other side).
     picked, seen = [], set()
     for sc, p in out:
-        key = (p["msplit"], p["Wm"], p["Wc"], p["Dk"], p["bw"])
-        if key in seen or p["mirror"]:
+        key = (p["msplit"], p["kids"], p["Wm"], p["Wc"], p["Dk"], p["bw"])
+        if key in seen:
             continue
         seen.add(key)
         picked.append((sc, p))
         if len(picked) >= limit - 1:
             break
     if picked:
-        top = picked[0][1]
-        twin = next(((sc, p) for sc, p in out if p["mirror"] and all(p[k] == top[k] for k in top if k != "mirror")), None)
-        if twin:
-            picked.append(twin)
+        picked.append((picked[0][0], {**picked[0][1], "mirror": True}))
     return [{"pre_score": round(sc, 3), "params": p, "spec": build_spec(brief, p)} for sc, p in picked]
 
 
@@ -198,6 +210,15 @@ def build_spec(brief, p):
         room("hall", "Hall", "circulation", rect(xk0, y1 - run, xh1, y2 + run))
         room("closet3", "Closet", "closet", rect(xk0, y2 + run, xh1, D))
         beds = ["bed2", "bed3"]
+    elif p["kids"] == "cross_hall":
+        # bedroom at the front, bath at the back, a short hall between them opening off the kitchen column
+        y1, y2 = p["Db"], p["Db"] + RULES["circulation"]["cross_hall_depth"]
+        xh = xk0 + RULES["circulation"]["cross_hall_length"]
+        room("bed2", "Bedroom 2", "bedroom", rect(xk0, 0, W, y1))
+        room("hall", "Hall", "circulation", rect(xk0, y1, xh, y2))
+        room("closet2", "Closet", "closet", rect(xh, y1, W, y2), ["walk_in"])
+        room("bath2", "Bathroom 2", "bathroom", rect(xk0, y2, W, D), ["wet_area"])
+        beds = ["bed2"]
     else:
         y1 = p["Db"]
         room("bed2", "Bedroom 2", "bedroom", rect(xh1, 0, W, y1))
@@ -239,7 +260,7 @@ def build_spec(brief, p):
         r = w[rule]
         return {"id": oid, "type": "window", "room": rid, "facade": facade, "width_mm": r["width_mm"],
                 "height_mm": r["height_mm"], "sill_mm": r["sill_mm"], "operation": "fixed" if rule == "bathroom" else "sliding",
-                "count": count or r["per_exterior_side"], "label": r.get("label", "Window")}
+                "count": count or r["per_exterior_side"], "min_count": 1, "label": r.get("label", "Window")}
 
     ops = [
         door("d_entry", "foyer", "porch", "entry", into="foyer", facade="south", position="center", label="Front Entry Door"),
@@ -254,7 +275,7 @@ def build_spec(brief, p):
     ]
     for i, b in enumerate(beds):
         ops.append(door(f"d_{b}", "hall", b, "bedroom"))
-        ops.append(door(f"d_{b}_closet", b, f"closet{b[-1]}", "closet_reach_in"))
+        ops.append(door(f"d_{b}_closet", b, f"closet{b[-1]}", "closet_walk_in" if p.get("kids") == "cross_hall" else "closet_reach_in"))
     if g:
         ops.append(door("d_garage_house", "garage", "laundry", "garage_to_house", into="laundry"))
         ops.append({"id": "d_garage_vehicle", "type": "door", "between": ["garage", "exterior"], "facade": "south",

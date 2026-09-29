@@ -1,0 +1,727 @@
+{
+  "plan_id": "tc_design",
+  "title": "One-Story Ranch",
+  "authoring_unit": "ft",
+  "normalize_origin": true,
+  "defaults": {
+    "wall_height_mm": 2743,
+    "thickness_mm": {
+      "exterior": 152,
+      "interior": 114
+    }
+  },
+  "levels": [
+    {
+      "id": "level_01",
+      "name": "First Floor",
+      "elevation_mm": 0,
+      "is_building_story": true
+    }
+  ],
+  "rooms": [
+    {
+      "id": "master_bed",
+      "name": "Master Bedroom",
+      "usage": "bedroom",
+      "level": "level_01",
+      "rect": [
+        0.0,
+        17.5,
+        12.0,
+        30.5
+      ],
+      "tags": [
+        "master"
+      ]
+    },
+    {
+      "id": "master_bath",
+      "name": "Master Bath",
+      "usage": "bathroom",
+      "level": "level_01",
+      "rect": [
+        0.0,
+        0.0,
+        12.0,
+        10.0
+      ],
+      "tags": [
+        "master",
+        "wet_area"
+      ]
+    },
+    {
+      "id": "master_wic",
+      "name": "Walk-in Closet",
+      "usage": "closet",
+      "level": "level_01",
+      "rect": [
+        0.0,
+        10.0,
+        12.0,
+        17.5
+      ],
+      "tags": [
+        "master"
+      ]
+    },
+    {
+      "id": "foyer",
+      "name": "Foyer",
+      "usage": "circulation",
+      "level": "level_01",
+      "rect": [
+        12.0,
+        0.0,
+        30.0,
+        7.0
+      ],
+      "tags": [
+        "entry"
+      ]
+    },
+    {
+      "id": "family",
+      "name": "Family Room",
+      "usage": "living",
+      "level": "level_01",
+      "rect": [
+        12.0,
+        7.0,
+        30.0,
+        30.5
+      ],
+      "tags": [
+        "open_plan"
+      ]
+    },
+    {
+      "id": "laundry",
+      "name": "Laundry / Mud",
+      "usage": "laundry",
+      "level": "level_01",
+      "rect": [
+        30.0,
+        0.0,
+        43.0,
+        7.0
+      ],
+      "tags": [
+        "wet_area"
+      ]
+    },
+    {
+      "id": "dining",
+      "name": "Dining",
+      "usage": "dining",
+      "level": "level_01",
+      "rect": [
+        30.0,
+        7.0,
+        43.0,
+        16.5
+      ],
+      "tags": [
+        "open_plan"
+      ]
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "usage": "kitchen",
+      "level": "level_01",
+      "rect": [
+        30.0,
+        16.5,
+        43.0,
+        30.5
+      ],
+      "tags": [
+        "open_plan",
+        "wet_area",
+        "island",
+        "large_island"
+      ]
+    },
+    {
+      "id": "bed2",
+      "name": "Bedroom 2",
+      "usage": "bedroom",
+      "level": "level_01",
+      "rect": [
+        46.5,
+        0.0,
+        59.0,
+        12.0
+      ],
+      "tags": []
+    },
+    {
+      "id": "bath2",
+      "name": "Bathroom 2",
+      "usage": "bathroom",
+      "level": "level_01",
+      "rect": [
+        46.5,
+        12.0,
+        59.0,
+        18.5
+      ],
+      "tags": [
+        "wet_area"
+      ]
+    },
+    {
+      "id": "bed3",
+      "name": "Bedroom 3",
+      "usage": "bedroom",
+      "level": "level_01",
+      "rect": [
+        46.5,
+        18.5,
+        59.0,
+        30.5
+      ],
+      "tags": []
+    },
+    {
+      "id": "closet2",
+      "name": "Closet",
+      "usage": "closet",
+      "level": "level_01",
+      "rect": [
+        43.0,
+        0.0,
+        46.5,
+        8.0
+      ],
+      "tags": []
+    },
+    {
+      "id": "hall",
+      "name": "Hall",
+      "usage": "circulation",
+      "level": "level_01",
+      "rect": [
+        43.0,
+        8.0,
+        46.5,
+        22.5
+      ],
+      "tags": []
+    },
+    {
+      "id": "closet3",
+      "name": "Closet",
+      "usage": "closet",
+      "level": "level_01",
+      "rect": [
+        43.0,
+        22.5,
+        46.5,
+        30.5
+      ],
+      "tags": []
+    },
+    {
+      "id": "garage",
+      "name": "Garage",
+      "usage": "garage",
+      "level": "level_01",
+      "rect": [
+        37.0,
+        -22.0,
+        59.0,
+        0.0
+      ],
+      "tags": []
+    },
+    {
+      "id": "porch",
+      "name": "Covered Entry",
+      "usage": "porch",
+      "level": "level_01",
+      "rect": [
+        12.0,
+        -6.0,
+        37.0,
+        0.0
+      ],
+      "tags": [
+        "exterior",
+        "covered"
+      ]
+    },
+    {
+      "id": "patio",
+      "name": "Covered Patio",
+      "usage": "patio",
+      "level": "level_01",
+      "rect": [
+        12.0,
+        30.5,
+        43.0,
+        42.5
+      ],
+      "tags": [
+        "exterior",
+        "covered"
+      ]
+    }
+  ],
+  "walls": "derive",
+  "open_between": [
+    [
+      "foyer",
+      "family"
+    ],
+    [
+      "family",
+      "kitchen"
+    ],
+    [
+      "kitchen",
+      "dining"
+    ],
+    [
+      "dining",
+      "family"
+    ]
+  ],
+  "openings": [
+    {
+      "id": "d_entry",
+      "type": "door",
+      "between": [
+        "foyer",
+        "porch"
+      ],
+      "width_mm": 914,
+      "operation": "swing",
+      "label": "Front Entry Door",
+      "swing_into": "foyer",
+      "facade": "south",
+      "position": "center"
+    },
+    {
+      "id": "d_master",
+      "type": "door",
+      "between": [
+        "family",
+        "master_bed"
+      ],
+      "width_mm": 813,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "master_bed"
+    },
+    {
+      "id": "d_master_wic",
+      "type": "door",
+      "between": [
+        "master_bed",
+        "master_wic"
+      ],
+      "width_mm": 762,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "master_wic"
+    },
+    {
+      "id": "d_master_bath",
+      "type": "door",
+      "between": [
+        "master_wic",
+        "master_bath"
+      ],
+      "width_mm": 762,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "master_bath"
+    },
+    {
+      "id": "d_laundry_dining",
+      "type": "door",
+      "between": [
+        "dining",
+        "laundry"
+      ],
+      "width_mm": 813,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "laundry"
+    },
+    {
+      "id": "d_hall",
+      "type": "door",
+      "between": [
+        "dining",
+        "hall"
+      ],
+      "width_mm": 1067,
+      "operation": "cased",
+      "label": "Cased Opening",
+      "position": "start"
+    },
+    {
+      "id": "d_bath2",
+      "type": "door",
+      "between": [
+        "hall",
+        "bath2"
+      ],
+      "width_mm": 762,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "bath2"
+    },
+    {
+      "id": "d_bed2",
+      "type": "door",
+      "between": [
+        "hall",
+        "bed2"
+      ],
+      "width_mm": 813,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "bed2"
+    },
+    {
+      "id": "d_bed2_closet",
+      "type": "door",
+      "between": [
+        "bed2",
+        "closet2"
+      ],
+      "width_mm": 1524,
+      "operation": "sliding",
+      "label": "Bypass Closet Doors"
+    },
+    {
+      "id": "d_bed3",
+      "type": "door",
+      "between": [
+        "hall",
+        "bed3"
+      ],
+      "width_mm": 813,
+      "operation": "swing",
+      "label": "Door",
+      "swing_into": "bed3"
+    },
+    {
+      "id": "d_bed3_closet",
+      "type": "door",
+      "between": [
+        "bed3",
+        "closet3"
+      ],
+      "width_mm": 1524,
+      "operation": "sliding",
+      "label": "Bypass Closet Doors"
+    },
+    {
+      "id": "d_garage_house",
+      "type": "door",
+      "between": [
+        "garage",
+        "laundry"
+      ],
+      "width_mm": 914,
+      "operation": "swing",
+      "label": "20-min Fire-rated Self-closing Door",
+      "swing_into": "laundry"
+    },
+    {
+      "id": "d_garage_vehicle",
+      "type": "door",
+      "between": [
+        "garage",
+        "exterior"
+      ],
+      "facade": "south",
+      "width_mm": 2743,
+      "height_mm": 2134,
+      "count": 2,
+      "label": "Overhead Sectional Garage Door"
+    },
+    {
+      "id": "d_garage_service",
+      "type": "door",
+      "between": [
+        "garage",
+        "exterior"
+      ],
+      "width_mm": 914,
+      "operation": "swing",
+      "label": "Service Door",
+      "swing_into": "garage",
+      "facade": "east"
+    },
+    {
+      "id": "d_patio",
+      "type": "door",
+      "between": [
+        "family",
+        "patio"
+      ],
+      "width_mm": 2438,
+      "operation": "sliding",
+      "label": "Sliding Patio Door 8'-0\"",
+      "facade": "north",
+      "position": "center"
+    },
+    {
+      "id": "w_master_rear",
+      "type": "window",
+      "room": "master_bed",
+      "facade": "north",
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "operation": "sliding",
+      "count": 2,
+      "min_count": 1,
+      "label": "Window"
+    },
+    {
+      "id": "w_master_side",
+      "type": "window",
+      "room": "master_bed",
+      "facade": "west",
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "operation": "sliding",
+      "count": 1,
+      "min_count": 1,
+      "label": "Window"
+    },
+    {
+      "id": "w_master_bath",
+      "type": "window",
+      "room": "master_bath",
+      "facade": "south",
+      "width_mm": 914,
+      "height_mm": 762,
+      "sill_mm": 1372,
+      "operation": "fixed",
+      "count": 1,
+      "min_count": 1,
+      "label": "Privacy Window"
+    },
+    {
+      "id": "w_foyer",
+      "type": "window",
+      "room": "foyer",
+      "facade": "south",
+      "width_mm": 914,
+      "height_mm": 1524,
+      "sill_mm": 610,
+      "operation": "sliding",
+      "count": 2,
+      "min_count": 1,
+      "label": "Window"
+    },
+    {
+      "id": "w_kitchen",
+      "type": "window",
+      "room": "kitchen",
+      "facade": "north",
+      "width_mm": 1219,
+      "height_mm": 1067,
+      "sill_mm": 1067,
+      "operation": "sliding",
+      "count": 1,
+      "min_count": 1,
+      "label": "Window over Sink"
+    },
+    {
+      "id": "w_bed2_side",
+      "type": "window",
+      "room": "bed2",
+      "facade": "east",
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "operation": "sliding",
+      "count": 1,
+      "min_count": 1,
+      "label": "Window"
+    },
+    {
+      "id": "w_bed3_side",
+      "type": "window",
+      "room": "bed3",
+      "facade": "east",
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "operation": "sliding",
+      "count": 1,
+      "min_count": 1,
+      "label": "Window"
+    },
+    {
+      "id": "w_bed3_rear",
+      "type": "window",
+      "room": "bed3",
+      "facade": "north",
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "operation": "sliding",
+      "count": 1,
+      "min_count": 1,
+      "label": "Window"
+    },
+    {
+      "id": "w_bath2",
+      "type": "window",
+      "room": "bath2",
+      "facade": "east",
+      "width_mm": 914,
+      "height_mm": 762,
+      "sill_mm": 1372,
+      "operation": "fixed",
+      "count": 1,
+      "min_count": 1,
+      "label": "Privacy Window"
+    }
+  ],
+  "floor_slabs": [
+    {
+      "id": "slab_house",
+      "level": "level_01",
+      "rect": [
+        0.0,
+        0.0,
+        59.0,
+        30.5
+      ]
+    },
+    {
+      "id": "slab_garage",
+      "level": "level_01",
+      "height_above_level_mm": -102,
+      "rect": [
+        37.0,
+        -22.0,
+        59.0,
+        0.0
+      ]
+    },
+    {
+      "id": "slab_porch",
+      "level": "level_01",
+      "height_above_level_mm": -102,
+      "rect": [
+        12.0,
+        -6.0,
+        37.0,
+        0.0
+      ]
+    },
+    {
+      "id": "slab_patio",
+      "level": "level_01",
+      "height_above_level_mm": -102,
+      "rect": [
+        12.0,
+        30.5,
+        43.0,
+        42.5
+      ]
+    }
+  ],
+  "massing": {
+    "typology": "ranch",
+    "volumes": [
+      {
+        "id": "main",
+        "role": "shell",
+        "rect": [
+          0.0,
+          0.0,
+          59.0,
+          30.5
+        ],
+        "levels": [
+          "level_01"
+        ]
+      },
+      {
+        "id": "garage",
+        "role": "garage",
+        "rect": [
+          37.0,
+          -22.0,
+          59.0,
+          0.0
+        ],
+        "levels": [
+          "level_01"
+        ],
+        "attach_to": "main"
+      },
+      {
+        "id": "porch_cover",
+        "role": "cover",
+        "rect": [
+          12.0,
+          -6.0,
+          37.0,
+          0.0
+        ],
+        "attach_to": "main",
+        "covers": [
+          "porch"
+        ]
+      },
+      {
+        "id": "patio_cover",
+        "role": "cover",
+        "rect": [
+          12.0,
+          30.5,
+          43.0,
+          42.5
+        ],
+        "attach_to": "main",
+        "covers": [
+          "patio"
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "generated_by": "oas_pipeline solver ranch v0",
+    "notes": "Generated from a homeowner brief; see solver params.",
+    "solver_params": {
+      "W": 59.0,
+      "D": 30.5,
+      "Wm": 12,
+      "Wg": 18,
+      "Wc": 13,
+      "Wk": 16.0,
+      "bw": 12.5,
+      "Df": 7,
+      "Dl": 7,
+      "Dk": 14,
+      "Ddin": 9.5,
+      "Dmb": 13,
+      "Dbath": 6.5,
+      "Db": 12.0,
+      "s": 2,
+      "gw": 22,
+      "gd": 22,
+      "mirror": false,
+      "hall": 3.5,
+      "msplit": "walk_through",
+      "kids": "hall_column",
+      "kitchen_rule": "large_island",
+      "Dwic": 7.5
+    }
+  }
+}

@@ -39,6 +39,10 @@ python3 tools/oas_pipeline build tools/oas_pipeline/examples/barndominium_40x60/
 (cd tools/oas_pipeline/exterior && npm install)                 # three.js (+ playwright)
 python3 tools/oas_pipeline exterior svg-viewer/examples/barndominium_40x60.json -o out/ \
     --design tools/oas_pipeline/examples/barndominium_40x60/exterior.json --render
+
+# design engine: homeowner text -> brief (1 LLM call) -> solver -> validated, scored design
+python3 tools/oas_pipeline design "$(cat tools/oas_pipeline/examples/tc2_ranch/homeowner.txt)" -o out/ --render
+python3 tools/oas_pipeline design --brief tools/oas_pipeline/examples/tc2_ranch/brief.json -o out/  # no LLM
 ```
 
 Set `CHROMIUM_PATH` if the local Playwright cannot find a browser.
@@ -49,4 +53,7 @@ Set `CHROMIUM_PATH` if the local Playwright cannot find a browser.
   `tools/oas_pipeline/examples/barndominium_40x60/spec.json` compiles to (tests enforce this).
   Change the spec, regenerate, and commit both.
 - The 3D exterior is never edited by hand. It is rebuilt from the plan, and the consistency
-  check must report 0 errors.
+  check must report 0 errors. It is built from the complete multi-level plan, never a level extract.
+- `tools/oas_pipeline/examples/tc2_ranch/` is TEST CASE #2. Replaying `brief.json` must reproduce
+  `tc_design.json` exactly; if a solver/rule change alters it on purpose, re-run and commit the fixture.
+- Design rules live in `brain/*.json`, not in solver code.

@@ -297,11 +297,11 @@ The same principle must hold for photoreal images (§5) and for any future consu
 | # | Milestone | Proves |
 |---|---|---|
 | M0 ✅ | **Massing layer** (§8): volumes + typology rules → envelope walls, unassigned spaces, roofs; plan-level roof/opening/headroom invariants. | 2D and 3D compile from one building description. |
-| M1 | **House Model v0 + walls-from-rooms.** Authoring = rooms (polygons or zone slots) + openings by room pair/facade; walls and exterior openings derived. Re-express the barndominium in it; the regression test must still produce the same plan. | The authoring surface an LLM or solver needs is small. |
-| M2 | **House Brain v0 as data.** Room size/proportion tables, adjacency matrix, clearances, window rules, privacy zones, plus a **scorer** (circulation %, dead area, adjacency satisfaction, proportions, wet-wall clustering). | Rules are explicit and testable. |
-| M3 | **Typology solver v0** for rectangular 1- and 2-story shells (banded layouts), placing doors, windows and stairs by rule and emitting N candidates. | No LLM coordinates. |
-| M4 | **Intake prompt → house program** (one small-model call) + optional concept call. | Homeowner language in, program out. |
-| M5 | **TEST CASE #2 end-to-end**, timed and costed, plus the barndominium re-run through the same path. | Generalisation and cost. |
+| M1 ✅ | **House Model v0 + walls-from-rooms.** Authoring = rooms (polygons or zone slots) + openings by room pair/facade; walls and exterior openings derived. Re-express the barndominium in it; the regression test must still produce the same plan. | The authoring surface an LLM or solver needs is small. |
+| M2 ✅ | **House Brain v0 as data.** Room size/proportion tables, adjacency matrix, clearances, window rules, privacy zones, plus a **scorer** (circulation %, dead area, adjacency satisfaction, proportions, wet-wall clustering). | Rules are explicit and testable. |
+| M3 ◐ | **Typology solver v0** for rectangular 1- and 2-story shells (banded layouts), placing doors, windows and stairs by rule and emitting N candidates. | No LLM coordinates. |
+| M4 ✅ | **Intake prompt → house program** (one small-model call) + optional concept call. | Homeowner language in, program out. |
+| M5 ✅ | **TEST CASE #2 end-to-end**, timed and costed, plus the barndominium re-run through the same path. | Generalisation and cost. |
 | M6 | Consumer floor-plan renderer (server-side SVG→PDF: overall dimensions, area schedule, disclaimer). | Free product quality. |
 | M7 | Roof planner + line-drawing elevations from the exterior model. | Premium elevations. |
 | M8 | Photoreal pipeline with conditioning passes + verification. | Premium hero image that matches the plan. |
@@ -310,9 +310,14 @@ Success criteria for M5: under 20 s wall-clock, at most 3 LLM calls, about 3k LL
 tokens total, 0 validator errors, the program check passes, and a human reviewer rates the plan
 "reasonable to hand to a builder".
 
+Status: M1 walls are derived from rooms (`derive.py`); the barndominium is still authored with
+explicit walls as a fixed regression case. M2 is `brain/rules.json` + `brain/scoring.json` +
+`scoring.py`, which scores interior and exterior jointly. M3 is one template so far (`solver/ranch.py`,
+split-bedroom one-story ranch). M5 results are in §12; the human rating is still open.
+
 ---
 
-## 11. TEST CASE #2 (proposed)
+## 11. TEST CASE #2 (brief)
 
 > "We'd like a one-story ranch, about 1,800 square feet, three bedrooms and two bathrooms. Master
 > bedroom away from the kids' rooms. Open kitchen and family room with a big island. Two-car garage
@@ -336,3 +341,64 @@ zoning, a front garage and a rear covered outdoor space.
 
 Next benchmarks after it: a narrow-lot two-story (≤ 30' wide), a house without a garage, and a
 larger luxury home.
+
+---
+
+## 12. TEST CASE #2 results (engine v0)
+
+Run: `python3 tools/oas_pipeline design "$(cat tools/oas_pipeline/examples/tc2_ranch/homeowner.txt)" -o out/ --render`.
+Recorded output: [`examples/tc2_ranch/`](../tools/oas_pipeline/examples/tc2_ranch/) (brief, report,
+spec, plan, `views/`). Nothing was hand-specified: no room, wall, door or window coordinates and no
+room sizes. Manual intervention: none.
+
+| Measure | Result |
+|---|---|
+| AI | 1 call (Haiku 4.5), 2,298 input / 232 output tokens, 0 thinking tokens, $0.0035, 2.5 s API / 5.8 s wall. About 2k of the input is CLI overhead; a direct API call would be about 600 tokens in. |
+| Deterministic | solver enumeration 0.13 s; 8 candidates through generate → validate → program → 3D exterior → consistency → score in 5.7 s (0.7 s each) |
+| Total generation | 11.7 s (text in, validated and scored plan + 3D model out) |
+| Rendering | floor plan 1.8 s; 7 exterior views 13.3 s (headless Chromium; cacheable, can run in parallel) |
+| Checks | 8/8 candidates valid; 0 validation errors or warnings; program check passes; 0 plan ↔ 3D and 0 3D ↔ renderer inconsistencies |
+| Score | 92.1 (interior 93.1, exterior 90.6) |
+
+Weak metrics are visible in the score: wet-room clustering (0.45; the master and hall baths sit at
+opposite ends, which a split plan implies), opening rhythm (0.56), front glazing (0.71) and
+adjacency (0.88; the garage is far from the kitchen, reached through laundry and dining).
+
+**AI decisions (requirements only):** "big island" read as a large island; the master bedroom in a
+separate zone. The intake prompt forbids layout claims in assumptions (the first run said "Master
+bedroom positioned at front or side" and "garage depth ~20 ft"; both were ignored by the solver
+and are now disallowed).
+
+**Solver decisions (all deterministic, from brain rules):** 59' × 30.5' main body inside the 70'
+lot less 5' side setbacks (setback inferred); walk-in closet between master bedroom and bath; kids'
+bedrooms off a hall column; a 22' × 22' garage projecting forward at the kids' end and entering
+through the laundry/mud room; a covered entry porch by default; the mirror image offered.
+
+**Generalisation (same engine, briefs varied; `tests/test_engine.py`):**
+
+| Brief | Result |
+|---|---|
+| 2 bed, 1,400 sf, no garage, 60' lot | valid, 94.3. Uses the compact cross-hall kids' wing. |
+| 3 bed, 2,200 sf, 3-car garage, large island, open patio, 90' lot | valid, 88.7. The garage runs past the laundry in front of the foyer; the exterior score drops (85.1). |
+| 3 bed, 1,800 sf, no lot width | valid |
+| 4 bed | clean refusal: the solver handles 2–3 bedrooms |
+| 3 bed, 1,800 sf, 50' lot | clean refusal: 40' buildable width, the template needs 51'; a narrow-lot or two-story template is needed |
+
+The first version of the solver failed the three valid rows above. The fixes were a free width
+search instead of "lot width minus a little", wider room ranges from the brain, a compact kids'
+wing, garages wider than the laundry, and a bug in the headroom check (a garage roof's valley
+extension counted as cover over the porch).
+
+**Honest assessment of design quality.** The plans are coherent, buildable-looking ranch concepts:
+a split-bedroom layout, an open great room, a covered entry that reads as the front door, and a
+garage that neither hides the entry nor dominates the facade. Remaining weaknesses, in priority
+order:
+
+1. One template. Candidates vary only in sizes, so the scorer ranks near-identical plans.
+2. The dining room is interior, lit only through the kitchen and family room.
+3. The master bedroom door opens off the family room (no master vestibule).
+4. The foyer is shallow and wide.
+5. The garage reaches the kitchen through laundry → dining.
+
+Next: more templates (garage-side kitchen, L-shaped, narrow-lot two-story), master vestibule and
+pantry rules, and scoring weights calibrated against human ratings.
