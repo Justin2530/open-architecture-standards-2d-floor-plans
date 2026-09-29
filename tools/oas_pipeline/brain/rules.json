@@ -1,0 +1,259 @@
+{
+  "_comment": "House Brain v0: residential design rules as data. Feet unless a key ends in _mm. Used by the solver (sizing/placement), the scorer (ranking) and, later, as the only design knowledge an LLM prompt needs. Values are conventional US residential practice for concept design, not code compliance.",
+  "rooms": {
+    "master_bedroom": {
+      "usage": "bedroom",
+      "min_dim": 12,
+      "area": [
+        150,
+        260
+      ],
+      "max_aspect": 1.6
+    },
+    "bedroom": {
+      "usage": "bedroom",
+      "min_dim": 10,
+      "area": [
+        105,
+        180
+      ],
+      "max_aspect": 1.5
+    },
+    "master_bath": {
+      "usage": "bathroom",
+      "min_dim": 6,
+      "area": [
+        60,
+        170
+      ],
+      "max_aspect": 1.9
+    },
+    "bathroom": {
+      "usage": "bathroom",
+      "min_dim": 5,
+      "area": [
+        40,
+        100
+      ],
+      "max_aspect": 2.4
+    },
+    "walk_in_closet": {
+      "usage": "closet",
+      "min_dim": 5,
+      "area": [
+        30,
+        130
+      ],
+      "max_aspect": 2.2
+    },
+    "closet": {
+      "usage": "closet",
+      "min_dim": 2,
+      "area": [
+        6,
+        45
+      ],
+      "max_aspect": 5.0
+    },
+    "family": {
+      "usage": "living",
+      "min_dim": 13,
+      "area": [
+        230,
+        460
+      ],
+      "max_aspect": 1.9
+    },
+    "kitchen": {
+      "usage": "kitchen",
+      "min_dim": 11,
+      "area": [
+        120,
+        260
+      ],
+      "max_aspect": 1.8,
+      "min_dim_with_island": 12,
+      "large_island": {
+        "min_dim": 13,
+        "area": [
+          180,
+          300
+        ],
+        "_note": "homeowner asked for a big/large island"
+      }
+    },
+    "dining": {
+      "usage": "dining",
+      "min_dim": 9.5,
+      "area": [
+        90,
+        200
+      ],
+      "max_aspect": 1.7
+    },
+    "foyer": {
+      "usage": "circulation",
+      "min_dim": 5,
+      "area": [
+        35,
+        170
+      ],
+      "max_aspect": 3.5
+    },
+    "hall": {
+      "usage": "circulation",
+      "min_dim": 3.5,
+      "area": [
+        15,
+        120
+      ],
+      "max_aspect": 12
+    },
+    "laundry": {
+      "usage": "laundry",
+      "min_dim": 6,
+      "area": [
+        45,
+        120
+      ],
+      "max_aspect": 2.4
+    }
+  },
+  "garage": {
+    "1": {
+      "width": 12,
+      "depth": 22
+    },
+    "2": {
+      "width": 22,
+      "depth": 22
+    },
+    "3": {
+      "width": 32,
+      "depth": 22
+    },
+    "vehicle_door": {
+      "width_mm": 2743,
+      "height_mm": 2134,
+      "per_car": 1
+    }
+  },
+  "outdoor": {
+    "entry_porch_depth": 6,
+    "patio_depth": 12,
+    "covered_entry_by_default": true
+  },
+  "circulation": {
+    "hall_width": 3.5,
+    "min_door_run_ft": 4.0,
+    "_comment": "min_door_run_ft: shortest shared wall that fits a 2'-8\" door plus 200 mm corner clearance each side"
+  },
+  "site": {
+    "side_setback_ft": 5,
+    "_note": "Inferred when the homeowner gives only a lot width; labelled as an assumption in the output."
+  },
+  "heights": {
+    "plate_mm": 2743,
+    "door_head_mm": 2134
+  },
+  "doors": {
+    "entry": {
+      "width_mm": 914,
+      "operation": "swing"
+    },
+    "garage_to_house": {
+      "width_mm": 914,
+      "operation": "swing",
+      "label": "20-min Fire-rated Self-closing Door"
+    },
+    "service": {
+      "width_mm": 914,
+      "operation": "swing"
+    },
+    "bedroom": {
+      "width_mm": 813,
+      "operation": "swing"
+    },
+    "bath": {
+      "width_mm": 762,
+      "operation": "swing"
+    },
+    "closet_walk_in": {
+      "width_mm": 762,
+      "operation": "swing"
+    },
+    "closet_reach_in": {
+      "width_mm": 1524,
+      "operation": "sliding",
+      "label": "Bypass Closet Doors"
+    },
+    "utility": {
+      "width_mm": 813,
+      "operation": "swing"
+    },
+    "hall_entry": {
+      "width_mm": 1067,
+      "operation": "cased",
+      "label": "Cased Opening"
+    },
+    "patio": {
+      "width_mm": 2438,
+      "operation": "sliding",
+      "label": "Sliding Patio Door 8'-0\""
+    }
+  },
+  "windows": {
+    "_comment": "Heads align at door head height (2134 mm) except privacy/work windows. Egress windows >= 610 mm wide.",
+    "bedroom": {
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "per_exterior_side": 1,
+      "max_per_side": 2
+    },
+    "master_bedroom": {
+      "width_mm": 1219,
+      "height_mm": 1219,
+      "sill_mm": 914,
+      "per_exterior_side": 2,
+      "max_per_side": 2
+    },
+    "bathroom": {
+      "width_mm": 914,
+      "height_mm": 762,
+      "sill_mm": 1372,
+      "per_exterior_side": 1,
+      "max_per_side": 1,
+      "label": "Privacy Window"
+    },
+    "kitchen": {
+      "width_mm": 1219,
+      "height_mm": 1067,
+      "sill_mm": 1067,
+      "per_exterior_side": 1,
+      "max_per_side": 1,
+      "label": "Window over Sink"
+    },
+    "living": {
+      "width_mm": 1219,
+      "height_mm": 1524,
+      "sill_mm": 610,
+      "per_exterior_side": 2,
+      "max_per_side": 3
+    },
+    "dining": {
+      "width_mm": 1524,
+      "height_mm": 1524,
+      "sill_mm": 610,
+      "per_exterior_side": 1,
+      "max_per_side": 2
+    },
+    "circulation": {
+      "width_mm": 914,
+      "height_mm": 1524,
+      "sill_mm": 610,
+      "per_exterior_side": 2,
+      "max_per_side": 2
+    }
+  }
+}

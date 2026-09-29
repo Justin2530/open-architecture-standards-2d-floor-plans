@@ -77,6 +77,10 @@ class WallFrame:
 
 class ExteriorModelBuilder:
     def __init__(self, doc: dict, design: dict | None = None):
+        src = doc.get("metadata", {}).get("level_extract_of")
+        if src:
+            raise ValueError(f"{doc.get('plan_id')} is a single-level extract of {src}; the exterior must be built "
+                             "from the complete multi-level house model, never from one floor")
         self.doc = doc
         self.d = merge(DEFAULT_DESIGN, design)
         self.levels = sorted(doc.get("levels", []) or [{"id": None, "elevation_mm": 0}],
@@ -181,6 +185,11 @@ class ExteriorModelBuilder:
         return base, base + self.d["default_wall_height_mm"], ["wall_height_mm missing: default used (inferred)"]
 
     def walls_and_openings(self):
+        # every wall top (exterior or party wall) can carry a roof edge
+        for w in self.doc.get("walls", []):
+            if not self.is_exterior_wall(w):
+                _, top, _ = self.wall_z(w)
+                self.support.append((WallFrame(w), 0.0, WallFrame(w).L, top))
         by_wall = {}
         for o in self.doc.get("openings", []):
             by_wall.setdefault(o.get("in_wall"), []).append(o)
@@ -566,6 +575,7 @@ class ExteriorModelBuilder:
                     self.issues.append({"severity": "error", "code": "roof_edge_unsupported", "refs": [roof["id"]],
                                         "message": msg + " — the plan does not define what encloses or supports this.",
                                         "edge": k, "range_mm": [r1(s0), r1(s1)]})
+        vol_of = {f"roof_{v['id']}": v for v in self.doc.get("massing", {}).get("volumes", [])}
         for i, ra in enumerate(roofs):
             for rb in roofs[i + 1:]:
                 ov = self.roof_outline(ra).intersection(self.roof_outline(rb))
@@ -578,6 +588,13 @@ class ExteriorModelBuilder:
                 worst = min(max(self.roof_height(ra, x, y), self.roof_height(rb, x, y)) - t
                             - min(self.roof_height(ra, x, y), self.roof_height(rb, x, y)) for x, y in samples)
                 if worst < 0:
+                    va, vb = vol_of.get(ra["id"]), vol_of.get(rb["id"])
+                    if va and vb and (va.get("attach_to") == vb["id"] or vb.get("attach_to") == va["id"]) \
+                            and "cover" not in (va["role"], vb["role"]):
+                        self.issues.append({"severity": "info", "code": "roof_junction", "refs": [ra["id"], rb["id"]],
+                                            "message": f"{ra['id']} meets {rb['id']} in a valley junction (attached volumes); "
+                                                       "the junction line is not modelled, planes intersect in 3D"})
+                        continue
                     self.issues.append({"severity": "error", "code": "roofs_conflict", "refs": [ra["id"], rb["id"]],
                                         "message": f"{ra['id']} and {rb['id']} overlap over {ov.area / 1e6:.2f} m2 and intersect there "
                                                    f"(lower roof rises {-worst:.0f} mm into the upper one)."})
@@ -745,6 +762,7 @@ class ExteriorModelBuilder:
                             break
                     if all(math.dist((cx, cy), q) > size for q in posts):
                         posts.append((cx, cy))
+            posts = self.clear_openings(posts, foot, size, spacing)
             for cx, cy in posts:
                 if cover:
                     z_top = min(self.roof_height(rf, cx, cy) for rf in cover) - self.d["roof_thickness_mm"]
@@ -770,6 +788,40 @@ class ExteriorModelBuilder:
                     zb = self.roof_height(rf, x1, y1) - self.d["roof_thickness_mm"]
                     if abs(za - zb) < 10:
                         self.beam(part, min(za, zb) - self.d["beam_depth_mm"], min(za, zb), foot, g + [rf["id"]], "beam_under_roof_edge")
+
+    def clear_openings(self, posts, foot, size, spacing):
+        """Composition rule: a post must not stand in front of a door or window of the wall it faces.
+        Shift it sideways (along the beam line) to the nearest clear position; spacing may grow up to
+        1.25x the maximum. Posts that cannot be cleared stay and are reported."""
+        ops = [e for e in self.elements if e["kind"] == "opening"]
+        out = []
+        for cx, cy in posts:
+            blocked = []
+            for e in ops:
+                g = e["geom"]
+                o, u, n = g["origin"], g["u"], g["n"]
+                s, off = (cx - o[0]) * u[0] + (cy - o[1]) * u[1], (cx - o[0]) * n[0] + (cy - o[1]) * n[1]
+                if 0 < off < 6000 and -size / 2 - 150 < s < g["width"] + size / 2 + 150:
+                    blocked.append((e, s))
+            if not blocked:
+                out.append((cx, cy))
+                continue
+            e, s = blocked[0]
+            g = e["geom"]
+            best = None
+            for target in (-size / 2 - 150, g["width"] + size / 2 + 150):
+                d = target - s
+                nx_, ny_ = cx + g["u"][0] * d, cy + g["u"][1] * d
+                if foot.buffer(-size / 2 + 1).buffer(1).contains(Point(nx_, ny_)) and \
+                        all(math.dist((nx_, ny_), q) > size for q in out) and (best is None or abs(d) < abs(best[2])):
+                    best = (nx_, ny_, d)
+            if best:
+                out.append((best[0], best[1]))
+            else:
+                out.append((cx, cy))
+                self.issues.append({"severity": "warning", "code": "post_in_front_of_opening", "refs": [e["refs"][0]],
+                                    "message": f"porch post could not be moved clear of {e['refs'][0]}"})
+        return out
 
     def beam(self, part, z0, z1, foot, refs, rule):
         size = self.d["post_size_mm"]
@@ -881,8 +933,8 @@ class ExteriorModelBuilder:
             "left": ortho((-rgt[0], -rgt[1]), "Left elevation"),
             "right": ortho(rgt, "Right elevation"),
             "perspective": {"name": "Front perspective", "type": "perspective", "fov": 36,
-                            "position": [r1(c[0] + f[0] * size * 1.05 - rgt[0] * size * 0.62),
-                                         r1(c[1] + f[1] * size * 1.05 - rgt[1] * size * 0.62), r1(self.grade + 4200)],
+                            "position": [r1(c[0] + f[0] * size * 1.3 - rgt[0] * size * 0.75),
+                                         r1(c[1] + f[1] * size * 1.3 - rgt[1] * size * 0.75), r1(self.grade + 4200)],
                             "target": [r1(v) for v in (c[0], c[1], c[2] - size * 0.05)]},
             "aerial": {"name": "Aerial", "type": "perspective", "fov": 36,
                        "position": [r1(c[0] + f[0] * size * 0.95 - rgt[0] * size * 0.8),

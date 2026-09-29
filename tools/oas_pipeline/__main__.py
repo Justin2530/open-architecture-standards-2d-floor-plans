@@ -5,6 +5,7 @@
     python3 tools/oas_pipeline validate PLAN [--program PROGRAM] [--json]
     python3 tools/oas_pipeline render   PLAN -o OUT_DIR
     python3 tools/oas_pipeline exterior PLAN -o OUT_DIR [--design EXTERIOR.json] [--render]
+    python3 tools/oas_pipeline design   "homeowner text" -o OUT_DIR [--render]   (or --brief BRIEF.json)
 
 Exit status is non-zero when validation or the program check reports errors.
 """
@@ -101,6 +102,37 @@ def exterior(plan_path, out_dir, design_path=None, do_render=False, as_json=Fals
     return rep.ok
 
 
+def run_design(a):
+    import time
+    from oas_pipeline.engine.run import design
+    from oas_pipeline.scoring import format_score
+    rep = design(a.text, a.out, brief=_load(a.brief) if a.brief else None)
+    best = rep.get("_best")
+    if best and a.render:
+        t = time.perf_counter()
+        render(rep["outputs"]["plan"], a.out)
+        rep["timing_s"]["render_floor_plans"] = round(time.perf_counter() - t, 2)
+        t = time.perf_counter()
+        env = dict(os.environ)
+        root = subprocess.run(["npm", "root", "-g"], capture_output=True, text=True).stdout.strip()
+        env["NODE_PATH"] = os.pathsep.join(filter(None, [env.get("NODE_PATH"), root]))
+        subprocess.run([shutil.which("node"), os.path.join(HERE, "exterior", "render.mjs"), rep["outputs"]["exterior_model"], a.out],
+                       check=True, env=env)
+        rep["timing_s"]["render_exterior_views"] = round(time.perf_counter() - t, 2)
+        from oas_pipeline.exterior.consistency import check_consistency
+        cons, _ = check_consistency(best["doc"], best["model"], _load(os.path.join(a.out, "audit.json")))
+        rep["consistency_with_renderer_audit"] = {"errors": cons.errors}
+    rep.pop("_best", None)
+    with open(os.path.join(a.out, "report.json"), "w") as fh:
+        json.dump(rep, fh, indent=2, default=str)
+    print(json.dumps({k: rep.get(k) for k in ("ai", "timing_s", "decisions", "failures", "questions_for_homeowner",
+                                               "validation", "program_check", "consistency", "consistency_with_renderer_audit", "candidates")},
+                     indent=1, default=str))
+    if rep.get("score"):
+        print(format_score(rep["score"]))
+    return 0 if best else 1
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="oas_pipeline", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -117,6 +149,10 @@ def main(argv=None):
     x.add_argument("plan"); x.add_argument("-o", "--out", required=True)
     x.add_argument("--design", help="exterior design spec (materials, inferred-detail parameters)")
     x.add_argument("--render", action="store_true"); x.add_argument("--json", action="store_true")
+    dz = sub.add_parser("design", help="homeowner text -> brief (1 LLM call) -> solver -> validated, scored design")
+    dz.add_argument("text", nargs="?"); dz.add_argument("-o", "--out", required=True)
+    dz.add_argument("--brief", help="use this brief instead of calling the LLM (replay)")
+    dz.add_argument("--render", action="store_true")
     a = ap.parse_args(argv)
 
     if a.cmd in ("build", "generate"):
@@ -136,6 +172,8 @@ def main(argv=None):
     if a.cmd == "render":
         render(a.plan, a.out)
         return 0
+    if a.cmd == "design":
+        return run_design(a)
     if a.cmd == "exterior":
         return 0 if exterior(a.plan, a.out, a.design, a.render, a.json) else 1
 

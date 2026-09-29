@@ -1,0 +1,29 @@
+{
+  "_comment": "Weights for the joint interior + exterior score (0-100). Each metric returns 0..1; metrics that do not apply (e.g. vertical window alignment on a one-story house) are dropped and the rest renormalised. Interior usability and exterior architectural quality are scored together so a plan that works inside but produces poor massing or badly composed elevations ranks lower.",
+  "groups": { "interior": 0.6, "exterior": 0.4 },
+  "interior": {
+    "area_fit":            { "weight": 2, "tolerance": 0.05 },
+    "room_sizes":          { "weight": 3 },
+    "proportions":         { "weight": 2 },
+    "circulation_ratio":   { "weight": 2, "target_max": 0.12, "zero_at": 0.25 },
+    "adjacency":           { "weight": 3 },
+    "privacy":             { "weight": 2 },
+    "wet_room_clustering": { "weight": 1, "good_m": 8, "bad_m": 20 },
+    "daylight":            { "weight": 2 }
+  },
+  "exterior": {
+    "entry_prominence":      { "weight": 3 },
+    "garage_dominance":      { "weight": 2, "good_max_share": 0.35, "bad_share": 0.6 },
+    "front_glazing":         { "weight": 2, "good": [0.10, 0.25] },
+    "blank_walls":           { "weight": 2, "good_max_m": 4.0, "bad_m": 9.0 },
+    "head_alignment":        { "weight": 1, "tolerance_mm": 25 },
+    "vertical_alignment":    { "weight": 2, "tolerance_mm": 300 },
+    "opening_rhythm":        { "weight": 1 },
+    "massing_simplicity":    { "weight": 2, "good_max_volumes": 4, "good_max_roof_planes": 12 }
+  },
+  "adjacency_preferences": [
+    ["kitchen", "dining", 3], ["kitchen", "living", 3], ["dining", "living", 1],
+    ["laundry", "garage", 2], ["garage", "kitchen", 1], ["circulation", "living", 1],
+    ["bedroom", "bathroom", 1]
+  ]
+}

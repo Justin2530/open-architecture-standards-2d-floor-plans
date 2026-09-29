@@ -1,5 +1,5 @@
 {
-  "_comment": "House Brain v0 — massing rules per house typology. Used by the generator to compile massing volumes into roofs, envelope walls and unassigned upper spaces, so the design spec only states WHICH volumes exist, not how they are roofed. Pitches are rise:12. Overhangs in mm.",
+  "_comment": "House Brain v0 \u2014 massing rules per house typology. Used by the generator to compile massing volumes into roofs, envelope walls and unassigned upper spaces, so the design spec only states WHICH volumes exist, not how they are roofed. Pitches are rise:12. Overhangs in mm.",
   "_roles": {
     "shell": "enclosed building volume; every level it lists is fully enclosed by exterior walls up to its plate; space inside it not covered by rooms becomes the typology's unassigned_space",
     "wing": "enclosed volume attached to another (e.g. a one-story wing on a two-story shell); roofed separately",
@@ -10,35 +10,119 @@
     "description": "One rectangular post-frame shell over the whole main footprint, full height for every story in the program, under a single gable with the ridge on the long axis. Partial upper floors sit inside the shell; the rest of that story is unfinished attic/bonus space. Garages and porch roofs attach as lean-tos.",
     "unassigned_space": "attic",
     "roofs": {
-      "shell":  { "form": "gable", "ridge": "long_axis", "pitch": "4:12", "eave_overhang_mm": 305, "rake_overhang_mm": 305 },
-      "wing":   { "form": "shed", "slope": "away_from_attachment", "pitch": "2:12", "eave_overhang_mm": 305, "rake_overhang_mm": 305 },
-      "garage": { "form": "shed", "slope": "away_from_attachment", "pitch": "1:12", "eave_overhang_mm": 305, "rake_overhang_mm": 305 },
-      "cover":  { "form": "shed", "slope": "away_from_attachment", "attach_height": "below_eave", "pitch": "auto", "min_headroom_mm": 2134, "eave_overhang_mm": 305, "rake_overhang_mm": 305 }
+      "shell": {
+        "form": "gable",
+        "ridge": "long_axis",
+        "pitch": "4:12",
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      },
+      "wing": {
+        "form": "shed",
+        "slope": "away_from_attachment",
+        "pitch": "2:12",
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      },
+      "garage": {
+        "form": "shed",
+        "slope": "away_from_attachment",
+        "pitch": "1:12",
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      },
+      "cover": {
+        "form": "shed",
+        "slope": "away_from_attachment",
+        "attach_height": "below_eave",
+        "pitch": "auto",
+        "min_headroom_mm": 2134,
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      }
     }
   },
   "ranch": {
     "description": "Single-story; hip roof over each rectangular volume; garage wing gable; porches under shed covers.",
     "unassigned_space": "attic",
     "roofs": {
-      "shell":  { "form": "hip", "pitch": "5:12", "eave_overhang_mm": 457 },
-      "wing":   { "form": "hip", "pitch": "5:12", "eave_overhang_mm": 457 },
-      "garage": { "form": "gable", "ridge": "long_axis", "pitch": "5:12", "eave_overhang_mm": 457, "rake_overhang_mm": 305 },
-      "cover":  { "form": "shed", "slope": "away_from_attachment", "attach_height": "below_eave", "pitch": "auto", "min_headroom_mm": 2134, "eave_overhang_mm": 305, "rake_overhang_mm": 305 }
+      "shell": {
+        "form": "hip",
+        "pitch": "5:12",
+        "eave_overhang_mm": 457
+      },
+      "wing": {
+        "form": "hip",
+        "pitch": "5:12",
+        "eave_overhang_mm": 457
+      },
+      "garage": {
+        "form": "gable",
+        "ridge": "perpendicular_to_attachment",
+        "pitch": "5:12",
+        "eave_overhang_mm": 457,
+        "rake_overhang_mm": 305,
+        "attach": "dies_into_host"
+      },
+      "cover": {
+        "form": "shed",
+        "slope": "away_from_attachment",
+        "attach_height": "below_eave",
+        "pitch": "auto",
+        "min_headroom_mm": 2134,
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      }
     }
   },
   "two_story_traditional": {
     "description": "Stacked volumes: the shell covers only the footprint of the upper story; ground-floor areas outside it are wings with their own lower roofs. Unassigned space inside a shell story is a vaulted/open-to-below volume rather than attic.",
     "unassigned_space": "open_to_below",
     "roofs": {
-      "shell":  { "form": "gable", "ridge": "long_axis", "pitch": "8:12", "eave_overhang_mm": 305, "rake_overhang_mm": 305 },
-      "wing":   { "form": "shed", "slope": "away_from_attachment", "attach_height": "below_eave", "pitch": "4:12", "eave_overhang_mm": 305, "rake_overhang_mm": 305 },
-      "garage": { "form": "gable", "ridge": "long_axis", "pitch": "6:12", "eave_overhang_mm": 305, "rake_overhang_mm": 305 },
-      "cover":  { "form": "shed", "slope": "away_from_attachment", "attach_height": "below_eave", "pitch": "auto", "min_headroom_mm": 2134, "eave_overhang_mm": 305, "rake_overhang_mm": 305 }
+      "shell": {
+        "form": "gable",
+        "ridge": "long_axis",
+        "pitch": "8:12",
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      },
+      "wing": {
+        "form": "shed",
+        "slope": "away_from_attachment",
+        "attach_height": "below_eave",
+        "pitch": "4:12",
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      },
+      "garage": {
+        "form": "gable",
+        "ridge": "long_axis",
+        "pitch": "6:12",
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      },
+      "cover": {
+        "form": "shed",
+        "slope": "away_from_attachment",
+        "attach_height": "below_eave",
+        "pitch": "auto",
+        "min_headroom_mm": 2134,
+        "eave_overhang_mm": 305,
+        "rake_overhang_mm": 305
+      }
     }
   },
   "_constants": {
     "roof_assembly_mm": 150,
     "roof_to_roof_clearance_mm": 50,
-    "auto_pitch_candidates": ["4:12", "3:12", "2:12", "1:12", "1/2:12", "1/4:12"]
+    "auto_pitch_candidates": [
+      "4:12",
+      "3:12",
+      "2:12",
+      "1:12",
+      "1/2:12",
+      "1/4:12"
+    ],
+    "_attach_comment": "attach: dies_into_host = an attached gable/hip roof extends past its attachment edge until it meets the host roof surface (a valley junction; the junction line itself is not modelled in OAS)."
   }
 }

@@ -159,6 +159,9 @@ class MassingCompiler:
         info = {"form": form}
         if form == "gable":
             axis = cfg.get("ridge", "long_axis")
+            if axis == "perpendicular_to_attachment":
+                k_att, _t = self.attach_edge(v)
+                axis = "y" if is_x[k_att] else "x"
             if axis == "long_axis":
                 axis = "x" if max(L[k] for k in range(n) if is_x[k]) >= max(L[k] for k in range(n) if not is_x[k]) else "y"
             ang = pitch_deg(cfg["pitch"])
@@ -169,6 +172,15 @@ class MassingCompiler:
                     over[k] = cfg.get("rake_overhang_mm", 0)
             base, level = self.plate_z(v)
             info.update(ridge_axis=axis, pitch_deg=round(ang, 2))
+            if cfg.get("attach") == "dies_into_host":
+                # extend back over the host until this roof's ridge meets the host roof surface (valley)
+                k_att, target = self.attach_edge(v)
+                host = self.resolved[target["id"]]
+                span = L[k_att]
+                ridge_z = base + span / 2 * math.tan(math.radians(ang))
+                ext = max(0.0, ridge_z - host["base_z"]) / math.tan(math.radians(host["pitch_deg"]))
+                over[k_att] = int(round(ext))
+                info.update(attached_edge=k_att, extends_into_host_mm=over[k_att], junction_with=f"roof_{target['id']}")
         elif form == "hip":
             ang = pitch_deg(cfg["pitch"])
             slopes, defines, over = [ang] * n, [True] * n, [cfg.get("eave_overhang_mm", 0)] * n

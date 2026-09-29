@@ -154,6 +154,11 @@ class Generator:
         return (left[0] if left else "exterior"), (right[0] if right else "exterior")
 
     def _walls(self):
+        if self.spec.get("walls") == "derive":
+            from .derive import derive_walls
+            self.walls_json, self.wall_by_id = [], {}
+            derive_walls(self, SpecError)
+            return
         raw = []  # (id, level, from, to, kind, thickness)
         for w in self.spec.get("walls", []):
             lv = self._level(w, "wall")
@@ -198,8 +203,9 @@ class Generator:
         self.wall_by_id[wid] = wall
 
     def _openings(self):
+        from .derive import resolve_openings
         self.openings_json = []
-        for o in self.spec.get("openings", []):
+        for o in resolve_openings(self, SpecError):
             oid = o["id"]
             wall = self.wall_by_id.get(o["wall"])
             if wall is None:
@@ -247,6 +253,11 @@ class Generator:
                 "host_type": r.get("host_type", "floor"),
                 "path": {"unit": "mm", "closed": bool(r.get("closed", False)), "points": pts},
                 "base_offset_mm": r.get("base_offset_mm", 0)})
+        for k, (lv, a, b) in enumerate(getattr(self, "_derived_railings", []), start=1):
+            self.railings_json.append({
+                "id": f"rail_{k:03d}", "type_name": "IfcRailing", "level": lv, "host_type": "floor",
+                "path": {"unit": "mm", "closed": False, "points": [{"x": int(a[0]), "y": int(a[1])}, {"x": int(b[0]), "y": int(b[1])}]},
+                "base_offset_mm": 0, "derived_from": "rooms"})
 
     def _floor_tops(self, slabs: list) -> dict:
         """Walking-surface height of each room: its level plus the offset of a slab with the same footprint."""
@@ -377,7 +388,8 @@ def level_extracts(doc: dict) -> list[tuple[str, dict]]:
             **({"extensions": doc["extensions"], "massing": doc["massing"]} if "massing" in doc else {}),
             "connections": [c for c in doc.get("connections", [])
                             if all(n == "exterior" or n in room_ids for n in (c["from"], c["to"]))],
-            "metadata": {**doc.get("metadata", {}), "notes": f"{lname} extract of {doc['plan_id']}. " + notes},
+            "metadata": {**doc.get("metadata", {}), "notes": f"{lname} extract of {doc['plan_id']}. " + notes,
+                         "level_extract_of": doc["plan_id"]},
         }
         out.append((f"level{i}", sub))
     return out

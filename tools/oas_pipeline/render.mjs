@@ -23,7 +23,8 @@ await page.setInputFiles('#file-upload', path.resolve(plan));
 await page.waitForSelector('#svg-wrapper:not(.hidden)');
 
 const base = path.basename(plan, '.json');
-const buttons = await page.$$('#level-selector button');
+const all = await page.$$('#level-selector button');
+const buttons = all.length > 1 ? all : [];  // one level: the selector is hidden
 const shots = buttons.length ? buttons : [null];
 for (const [i, btn] of shots.entries()) {
     if (btn) await btn.click();

@@ -37,6 +37,18 @@ class BarndominiumExterior(unittest.TestCase):
         cls.doc = load(ROOT, "svg-viewer", "examples", "barndominium_40x60.json")
         cls.model = build_exterior_model(cls.doc, load(BARNDO, "exterior.json"))
 
+    def test_uses_the_complete_multi_level_house(self):
+        # Both floors are the source of truth: the model carries elements from every level, the
+        # consistency check covers every level, and a single-floor extract is refused.
+        levels = {e.get("level") for e in self.model["elements"] if e["class"] == "plan"}
+        self.assertTrue({"level_01", "level_02"} <= levels)
+        _, table = check_consistency(self.doc, self.model)
+        extents = {r["item"] for r in table if r["check"] == "story extents"}
+        self.assertTrue(any("level_01" in i for i in extents) and any("level_02" in i for i in extents))
+        for n in (1, 2):
+            with self.assertRaises(ValueError):
+                build_exterior_model(load(ROOT, "svg-viewer", "examples", f"barndominium_40x60_level{n}.json"))
+
     def test_consistent_with_plan(self):
         rep, _ = check_consistency(self.doc, self.model)
         self.assertEqual(rep.errors, [])
